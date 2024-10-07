@@ -198,6 +198,15 @@ if ( ! defined( 'YITH_WCAF' ) ) {
 					?>
 					<button class="btn button"><?php echo esc_html( $become_an_affiliate_text ); ?></button>
 				</p>
+
+				<?php
+				/**
+				 * DO_ACTION: yith_wcaf_become_an_affiliate_form_end
+				 *
+				 * Allows to render some content before the form to "Become an affiliate" ends.
+				 */
+				do_action( 'yith_wcaf_become_an_affiliate_form_end' );
+				?>
 			</form>
 		</div>
 

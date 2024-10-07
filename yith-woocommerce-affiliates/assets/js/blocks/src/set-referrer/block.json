@@ -13,11 +13,7 @@
 	},
 	"parent": [
 		"woocommerce/checkout-totals-block",
-		"woocommerce/checkout-contact-information-block",
-		"woocommerce/checkout-shipping-address-block",
-		"woocommerce/checkout-billing-address-block",
-		"woocommerce/checkout-shipping-methods-block",
-		"woocommerce/checkout-payment-methods-block"
+		"woocommerce/checkout-fields-block"
 	],
 	"textdomain": "yith-woocommerce-affiliates",
 	"editorStyle": "file:../../../../css/yith-wcaf.css"

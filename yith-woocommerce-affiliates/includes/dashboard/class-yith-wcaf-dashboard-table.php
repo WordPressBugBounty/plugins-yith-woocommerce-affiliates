@@ -140,6 +140,9 @@ if ( ! class_exists( 'YITH_WCAF_Dashboard_Table' ) ) {
 		 * Render table topbar (filters, etc)
 		 */
 		protected function render_topbar() {
+			if ( ! empty( $this->args['disable_topbar'] ) ) {
+				return;
+			}
 			?>
 			<div class="yith-wcaf-table-top-bar">
 				<form method="get">
@@ -210,9 +213,12 @@ if ( ! class_exists( 'YITH_WCAF_Dashboard_Table' ) ) {
 				}
 
 				?>
-				<input type="submit" value="<?php echo esc_html_x( 'Filter', '[FRONTEND] Dashboard table', 'yith-woocommerce-affiliates' ); ?>"/>
+				<input type="submit" class="btn button apply-filters" value="<?php echo esc_html_x( 'Filter', '[FRONTEND] Dashboard table', 'yith-woocommerce-affiliates' ); ?>"/>
 				<?php if ( ! empty( $values ) ) : ?>
-					<a href="<?php echo esc_url( YITH_WCAF_Dashboard()->get_dashboard_url( $this->args['endpoint'] ) ); ?>">
+					<a
+						href="<?php echo esc_url( YITH_WCAF_Dashboard()->get_dashboard_url( $this->args['endpoint'] ) ); ?>"
+						class="btn button reset-filters"
+					>
 						<?php echo esc_html_x( 'Reset', '[FRONTEND] Dashboard table', 'yith-woocommerce-affiliates' ); ?>
 					</a>
 				<?php endif; ?>
@@ -225,7 +231,7 @@ if ( ! class_exists( 'YITH_WCAF_Dashboard_Table' ) ) {
 		 */
 		protected function render_table_options() {
 			?>
-			<div class="table-options pull-right">
+			<div class="table-options">
 				<?php
 				/**
 				 * DO_ACTION: yith_wcaf_before_dashboard_table_options
@@ -252,8 +258,8 @@ if ( ! class_exists( 'YITH_WCAF_Dashboard_Table' ) ) {
 					?>
 					<label for="per_page" class="per-page">
 						<?php echo esc_html_x( 'Items per page:', '[FRONTEND] Dashboard table', 'yith-woocommerce-affiliates' ); ?>
-						<input max="100" min="1" step="1" type="number" name="per_page" value="<?php echo esc_attr( $per_page ); ?>"/>
 					</label>
+					<input max="100" min="1" step="1" type="number" name="per_page" class="quantity-input" value="<?php echo esc_attr( $per_page ); ?>"/>
 					<?php
 				endif;
 
@@ -649,7 +655,7 @@ if ( ! class_exists( 'YITH_WCAF_Dashboard_Table' ) ) {
 			$selected_status = $this->get_filter_values( 'status' );
 
 			?>
-			<select name="status" id="status">
+			<select name="status" id="status" class="yith-wcaf-enhanced-select" data-minimum_results_for_search="-1" data-minimum_input_length="-1">
 				<option value="">
 					<?php echo esc_html_x( 'All status', '[FRONTEND] Dashboard table filters', 'yith-woocommerce-affiliates' ); ?>
 				</option>
@@ -799,23 +805,28 @@ if ( ! class_exists( 'YITH_WCAF_Dashboard_Table' ) ) {
 		 * @param YITH_WCAF_Abstract_Object $object Row object.
 		 */
 		public function render_product_column( $object ) {
-			if ( ! method_exists( $object, 'get_product' ) ) {
+			if ( ! method_exists( $object, 'get_product_name' ) ) {
 				$this->render_empty_cell( $object, 'product' );
 				return;
 			}
 
-			$product = $object->get_product();
+			$product_name = $object->get_product_name();
+			$product_url  = method_exists( $object, 'get_product_url' ) ? $object->get_product_url() : false;
 
-			if ( ! $product ) {
+			if ( ! $product_name ) {
 				$this->render_empty_cell( $object, 'product' );
 				return;
 			}
 
-			?>
-			<a href="<?php echo esc_url( $product->get_permalink() ); ?>">
-				<?php echo wp_kses_post( $product->get_formatted_name() ); ?>
-			</a>
-			<?php
+			if ( $product_url ) :
+				?>
+				<a href="<?php echo esc_url( $product_url ); ?>">
+					<?php echo wp_kses_post( $product_name ); ?>
+				</a>
+				<?php
+			else :
+				echo wp_kses_post( $product_name );
+			endif;
 		}
 
 		/**

@@ -100,15 +100,14 @@ if ( ! class_exists( 'YITH_WCAF_Checkout' ) ) {
 			}
 
 			// retrieve current token and order.
-			$token = $affiliate->get_token();
-			$order = wc_get_order( $order );
+			$order        = wc_get_order( $order );
+			$token        = $affiliate->get_token();
+			$token_origin = YITH_WCAF_Session()->get_token_origin();
 
 			// if no order is found, return.
 			if ( ! $order ) {
 				return;
 			}
-
-			$order_id = $order->get_id();
 
 			if ( $this->should_process_checkout( $order, $token ) ) {
 				/**
@@ -121,11 +120,24 @@ if ( ! class_exists( 'YITH_WCAF_Checkout' ) ) {
 				 */
 				do_action( 'yith_wcaf_process_checkout_with_affiliate', $order, $token );
 
-				// create order commissions.
-				YITH_WCAF_Orders()->create_commissions( $order_id, $token, YITH_WCAF_Session()->get_token_origin() );
-
-				// register hit.
+				// register meta.
+				$order->update_meta_data( '_yith_wcaf_referral', $token );
+				$order->update_meta_data( '_yith_wcaf_token_origin', $token_origin );
 				$order->update_meta_data( '_yith_wcaf_click_id', YITH_WCAF_Clicks()->get_last_hit() );
+
+				// maybe create order commissions. By default, commissions are created when order first switches to one of paid_statuses.
+				/**
+				 * APPLY_FILTERS: yith_wcaf_create_commissions_on_checkout_order_processed
+				 *
+				 * Allows to create commissions on checkout order processed.
+				 *
+				 * @param bool     $process Whether to process commissions or not.
+				 * @param WC_Order $order   Order object.
+				 */
+				if ( apply_filters( 'yith_wcaf_create_commissions_on_checkout_order_processed', false, $order ) ) {
+					YITH_WCAF_Orders()->create_commissions( $order->get_id(), $token, $token_origin );
+				}
+
 				$order->save();
 			}
 

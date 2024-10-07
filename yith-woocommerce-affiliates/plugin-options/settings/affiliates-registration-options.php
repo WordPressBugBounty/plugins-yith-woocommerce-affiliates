@@ -20,6 +20,7 @@ if ( ! defined( 'YITH_WCAF' ) ) {
  *
  * @return array
  */
+
 return apply_filters(
 	'yith_wcaf_affiliates_registration_settings',
 	array(
@@ -62,7 +63,7 @@ return apply_filters(
 
 			'referral-registration-fields-end'        => array(
 				'type' => 'sectionend',
-				'id'   => 'yith_wcaf_referral_registration_fields',
+				'id'   => 'yith_wcaf_referral_registration_fields_end',
 			),
 
 
@@ -83,7 +84,7 @@ return apply_filters(
 
 			'referral-registration-extra-options-end' => array(
 				'type' => 'sectionend',
-				'id'   => 'yith_wcaf_referral_registration_extra',
+				'id'   => 'yith_wcaf_referral_registration_extra_end',
 			),
 
 		),

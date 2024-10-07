@@ -55,32 +55,39 @@ if ( ! class_exists( 'YITH_WCAF_Click' ) ) {
 		);
 
 		/**
+		 * Default object properties
+		 *
+		 * @var array
+		 */
+		protected $data = array(
+			'affiliate_id'    => 0,
+			'link'            => '',
+			'origin'          => '',
+			'origin_base'     => '',
+			'ip'              => '',
+			'date'            => '',
+			'order_id'        => 0,
+			'conversion_date' => '',
+			'conversion_time' => '',
+		);
+
+		/**
 		 * Constructor
 		 *
-		 * @param int|\YITH_WCAF_Click $click Click identifier.
+		 * @param int|array|\YITH_WCAF_Click $click Click identifier or click props.
 		 *
 		 * @throws Exception When not able to load Data Store class.
 		 */
 		public function __construct( $click = 0 ) {
-			// set default values.
-			$this->data = array(
-				'affiliate_id'    => 0,
-				'link'            => '',
-				'origin'          => '',
-				'origin_base'     => '',
-				'ip'              => '',
-				'date'            => '',
-				'order_id'        => 0,
-				'conversion_date' => '',
-				'conversion_time' => '',
-			);
-
 			parent::__construct();
 
 			if ( is_numeric( $click ) && $click > 0 ) {
 				$this->set_id( $click );
 			} elseif ( $click instanceof self ) {
 				$this->set_id( $click->get_id() );
+			} elseif ( is_array( $click ) && isset( $click['id'] ) ) {
+				$this->set_id( $click['id'] );
+				unset( $click['id'] );
 			} else {
 				$this->set_object_read( true );
 			}
@@ -90,6 +97,8 @@ if ( ! class_exists( 'YITH_WCAF_Click' ) ) {
 			if ( $this->get_id() > 0 ) {
 				$this->data_store->read( $this );
 			}
+
+			is_array( $click ) && $this->set_props( $click );
 		}
 
 		/* === GETTERS === */
@@ -226,6 +235,22 @@ if ( ! class_exists( 'YITH_WCAF_Click' ) ) {
 			}
 
 			return $this->order;
+		}
+
+		/**
+		 * Returns order edit url
+		 *
+		 * @param string $context Context of the operation.
+		 * @return string Order edit url
+		 */
+		public function get_order_edit_url( $context = 'view' ) {
+			$order = $this->get_order( $context );
+
+			if ( ! $order ) {
+				return '';
+			}
+
+			return $order->get_edit_order_url();
 		}
 
 		/**

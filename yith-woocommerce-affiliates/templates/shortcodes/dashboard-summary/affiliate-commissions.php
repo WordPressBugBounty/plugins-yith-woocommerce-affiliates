@@ -28,6 +28,7 @@ if ( ! defined( 'YITH_WCAF' ) ) {
 <!--COMMISSION SUMMARY-->
 
 <?php if ( $show_commissions_summary ) : ?>
+<div class="latest-commissions">
 	<div class="dashboard-title">
 		<h3><?php echo esc_html_x( 'Recent Commissions', '[FRONTEND] Affiliate dashboard', 'yith-woocommerce-affiliates' ); ?></h3>
 
@@ -42,20 +43,22 @@ if ( ! defined( 'YITH_WCAF' ) ) {
 	$table = new YITH_WCAF_Dashboard_Table(
 		$commissions,
 		array(
-			'columns'      => array(
+			'columns'        => array(
 				'created_at' => esc_html_x( 'Date', '[FRONTEND] Dashboard table', 'yith-woocommerce-affiliates' ),
 				'product'    => esc_html_x( 'Product', '[FRONTEND] Dashboard table', 'yith-woocommerce-affiliates' ),
 				'amount'     => esc_html_x( 'Amount', '[FRONTEND] Dashboard table', 'yith-woocommerce-affiliates' ),
 				'status'     => '',
 			),
-			'items'        => 'commissions',
-			'endpoint'     => 'commissions',
-			'singular'     => _x( 'commission', '[FRONTEND] Dashboard table', 'yith-woocommerce-affiliates' ),
-			'plural'       => _x( 'commissions', '[FRONTEND] Dashboard table', 'yith-woocommerce-affiliates' ),
-			'disable_sort' => true,
+			'items'          => 'commissions',
+			'endpoint'       => 'commissions',
+			'singular'       => _x( 'commission', '[FRONTEND] Dashboard table', 'yith-woocommerce-affiliates' ),
+			'plural'         => _x( 'commissions', '[FRONTEND] Dashboard table', 'yith-woocommerce-affiliates' ),
+			'disable_sort'   => true,
+			'disable_topbar' => true,
 		)
 	);
 
 	$table->render();
 	?>
+</div>
 <?php endif; ?>

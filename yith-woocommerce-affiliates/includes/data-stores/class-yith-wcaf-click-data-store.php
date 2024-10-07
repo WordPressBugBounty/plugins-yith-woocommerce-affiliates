@@ -28,10 +28,7 @@ if ( ! class_exists( 'YITH_WCAF_Click_Data_Store' ) ) {
 			global $wpdb;
 
 			// define table.
-			$this->table            = $wpdb->prefix . 'yith_wcaf_clicks';
-			$this->affiliates_table = $wpdb->prefix . 'yith_wcaf_affiliates';
-			$wpdb->yith_clicks      = $this->table;
-			$wpdb->yith_affiliates  = $this->affiliates_table;
+			$this->table = $wpdb->prefix . 'yith_wcaf_clicks';
 
 			$this->cache_group = 'clicks';
 
@@ -152,7 +149,7 @@ if ( ! class_exists( 'YITH_WCAF_Click_Data_Store' ) ) {
 
 			if ( ! $click_data ) {
 				// format query to retrieve click.
-				$query = $wpdb->prepare( "SELECT * FROM {$wpdb->yith_clicks} WHERE ID = %d", $id );
+				$query = $wpdb->prepare( "SELECT * FROM {$this->table} WHERE ID = %d", $id );
 
 				// retrieve click data.
 				$click_data = $wpdb->get_row( $query ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery
@@ -233,7 +230,7 @@ if ( ! class_exists( 'YITH_WCAF_Click_Data_Store' ) ) {
 			$this->clear_cache( $click );
 
 			// delete affiliate.
-			$res = $wpdb->delete( $wpdb->yith_clicks, array( 'ID' => $id ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+			$res = $wpdb->delete( $this->table, array( 'ID' => $id ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 
 			if ( $res ) {
 				/**
@@ -314,36 +311,30 @@ if ( ! class_exists( 'YITH_WCAF_Click_Data_Store' ) ) {
 
 			// if no data found in cache, query database.
 			if ( false === $res ) {
-				$query = "SELECT
+				// affiliates table name.
+				$affiliates_table = WC_Data_Store::load( 'affiliate' )->get_table();
+
+				$query      = "SELECT
 							yc.*,
 							ya.user_id AS user_id,
 							u.user_login AS user_login,
 							u.user_email AS user_email
-						   FROM {$wpdb->yith_clicks} AS yc
-						   LEFT JOIN {$wpdb->yith_affiliates} AS ya ON ya.ID = yc.affiliate_id
-						   LEFT JOIN {$wpdb->users} AS u ON u.ID = ya.user_id
-						   WHERE 1 = 1";
+						   FROM {$this->table} AS yc
+						   LEFT JOIN {$affiliates_table} AS ya ON ya.ID = yc.affiliate_id
+						   LEFT JOIN {$wpdb->users} AS u ON u.ID = ya.user_id";
+				$query_args = array();
 
 				if ( $is_counting ) {
 					$query = "SELECT COUNT(*)
-						FROM {$wpdb->yith_clicks} AS yc
-						LEFT JOIN {$wpdb->yith_affiliates} AS ya ON ya.ID = yc.affiliate_id
-						LEFT JOIN {$wpdb->users} AS u ON u.ID = ya.user_id
-						WHERE 1 = 1";
+						FROM {$this->table} AS yc
+						LEFT JOIN {$affiliates_table} AS ya ON ya.ID = yc.affiliate_id
+						LEFT JOIN {$wpdb->users} AS u ON u.ID = ya.user_id";
 				}
 
-				$where_components = $this->build_where_condition( $args );
-
-				$query     .= $where_components['where'];
-				$query_args = $where_components['query_args'];
-
-				if ( ! empty( $args['orderby'] ) && ! $is_counting ) {
-					$query .= $this->generate_query_orderby_clause( $args['orderby'], $args['order'], 'query' );
-				}
-
-				if ( ! empty( $args['limit'] ) && 0 < (int) $args['limit'] && ! $is_counting ) {
-					$query .= sprintf( ' LIMIT %d, %d', ! empty( $args['offset'] ) ? $args['offset'] : 0, $args['limit'] );
-				}
+				// append clauses to the query.
+				$query .= $this->generate_query_where_clause( $args, $query_args );
+				$query .= $this->generate_query_orderby_clause( $args, $query_args, 'query' );
+				$query .= $this->generate_query_limit_clause( $args, $query_args );
 
 				if ( ! empty( $query_args ) ) {
 					$query = $wpdb->prepare( $query, $query_args ); // phpcs:ignore WordPress.DB
@@ -450,7 +441,7 @@ if ( ! class_exists( 'YITH_WCAF_Click_Data_Store' ) ) {
 			if ( ! $res ) {
 				// initialize query parts.
 				$query_select = '';
-				$query_from   = "{$wpdb->yith_clicks} AS yc";
+				$query_from   = "{$this->table} AS yc";
 				$query_where  = '1=1';
 				$query_group  = '';
 				$query_order  = '';
@@ -564,7 +555,7 @@ if ( ! class_exists( 'YITH_WCAF_Click_Data_Store' ) ) {
 				}
 
 				if ( ! empty( $args['orderby'] ) ) {
-					$query_order .= $this->generate_query_orderby_clause( $args['orderby'], $args['order'], 'stats' );
+					$query_order .= $this->generate_query_orderby_clause( $args, $query_args, 'stats' );
 				}
 
 				if ( ! empty( $args['group_by'] ) && in_array( $args['group_by'], array( 'affiliate_id', 'time_interval' ), true ) ) {
@@ -572,7 +563,7 @@ if ( ! class_exists( 'YITH_WCAF_Click_Data_Store' ) ) {
 				}
 
 				if ( ! empty( $args['limit'] ) && 0 < (int) $args['limit'] ) {
-					$query_limit .= sprintf( ' LIMIT %d, %d', ! empty( $args['offset'] ) ? $args['offset'] : 0, $args['limit'] );
+					$query_limit .= $this->generate_query_limit_clause( $args, $query_args );
 				}
 
 				// clean components.
@@ -619,15 +610,15 @@ if ( ! class_exists( 'YITH_WCAF_Click_Data_Store' ) ) {
 		public function delete_all( $args = array() ) {
 			global $wpdb;
 
-			$query = "DELETE FROM {$wpdb->yith_clicks} WHERE 1=1";
+			$query = "DELETE FROM {$this->table}";
 
-			$where_components = $this->build_where_condition( $args );
+			list( $where, $query_args ) = yith_plugin_fw_extract( $this->generate_query_where_clause( $args ), 'where', 'where_args' );
 
-			$query    .= $where_components['where'];
-			$query_arg = $where_components['query_args'];
+			// append where clause to the query.
+			$query .= $where;
 
-			if ( ! empty( $query_arg ) ) {
-				$query = $wpdb->prepare( $query, $query_arg ); // phpcs:ignore WordPress.DB
+			if ( ! empty( $query_args ) ) {
+				$query = $wpdb->prepare( $query, $query_args ); // phpcs:ignore WordPress.DB
 			}
 
 			return $wpdb->query( $query ); // phpcs:ignore WordPress.DB
@@ -662,11 +653,13 @@ if ( ! class_exists( 'YITH_WCAF_Click_Data_Store' ) ) {
 
 				$args = wp_parse_args( $args, $defaults );
 
+				$affiliates_table = WC_Data_Store::load( 'affiliate' )->get_table();
+
 				$query_args = array();
 				$query      = "SELECT IF (yc.order_id IS NULL, 'not-converted', 'converted' ) AS status,
 						COUNT( yc.ID ) AS status_count 
-					FROM {$wpdb->yith_clicks} AS yc 
-					LEFT JOIN {$wpdb->yith_affiliates} AS ya ON ya.ID = yc.affiliate_id
+					FROM {$this->table} AS yc 
+					LEFT JOIN {$affiliates_table} AS ya ON ya.ID = yc.affiliate_id
 					WHERE 1 = 1";
 
 				if ( ! empty( $args['user_id'] ) ) {
@@ -719,19 +712,14 @@ if ( ! class_exists( 'YITH_WCAF_Click_Data_Store' ) ) {
 		}
 
 		/**
-		 * Creates where clause for queries
+		 * Generates where clause for the query, given a set of arguments
 		 *
-		 * @param array $args Filtering criteria (@see \YITH_WCAF_Click_Data_Store::query).
-		 *
-		 * @return array Array describing where condition:
-		 * [
-		 *     'where' => '',          // where condition
-		 *     'query_args' => array() // array of arguments to prepare this part of the query
-		 * ].
+		 * @param array $args       Array of query arguments.
+		 * @param array $query_args Array of parameters to build up into the query (reference).
+		 * @return string Where clause.
 		 */
-		protected function build_where_condition( $args = array() ) {
-			$where      = '';
-			$query_args = array();
+		protected function generate_query_where_clause( $args = array(), &$query_args = array() ) {
+			$where = ' WHERE 1 = 1';
 
 			$defaults = array(
 				'ID'             => false,
@@ -840,7 +828,7 @@ if ( ! class_exists( 'YITH_WCAF_Click_Data_Store' ) ) {
 				$query_args[] = $args['order_id'];
 			}
 
-			return compact( 'where', 'query_args' );
+			return $where;
 		}
 
 		/* === UTILITIES === */
@@ -855,7 +843,7 @@ if ( ! class_exists( 'YITH_WCAF_Click_Data_Store' ) ) {
 
 			$charset_collate = $wpdb->get_charset_collate();
 
-			return "CREATE TABLE $wpdb->yith_clicks (
+			return "CREATE TABLE $this->table (
                     ID bigint(20) NOT NULL AUTO_INCREMENT,
                     affiliate_id bigint(20) NOT NULL,
                     link varchar(255) NOT NULL,

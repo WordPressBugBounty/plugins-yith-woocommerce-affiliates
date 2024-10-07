@@ -28,6 +28,7 @@ if ( ! defined( 'YITH_WCAF' ) ) {
 <!--CLICKS SUMMARY-->
 
 <?php if ( $show_clicks_summary ) : ?>
+<div class="latest-clicks">
 	<div class="dashboard-title">
 		<h3><?php echo esc_html_x( 'Recent Visits', '[FRONTEND] Affiliate dashboard', 'yith-woocommerce-affiliates' ); ?></h3>
 
@@ -42,19 +43,21 @@ if ( ! defined( 'YITH_WCAF' ) ) {
 	$table = new YITH_WCAF_Dashboard_Table(
 		$clicks,
 		array(
-			'columns'      => array(
+			'columns'        => array(
 				'date'        => esc_html_x( 'Date', '[FRONTEND] Dashboard table', 'yith-woocommerce-affiliates' ),
 				'link'        => esc_html_x( 'Link', '[FRONTEND] Dashboard table', 'yith-woocommerce-affiliates' ),
 				'origin_base' => esc_html_x( 'Origin', '[FRONTEND] Dashboard table', 'yith-woocommerce-affiliates' ),
 			),
-			'items'        => 'clicks',
-			'endpoint'     => 'clicks',
-			'singular'     => _x( 'visit', '[FRONTEND] Dashboard table', 'yith-woocommerce-affiliates' ),
-			'plural'       => _x( 'visits', '[FRONTEND] Dashboard table', 'yith-woocommerce-affiliates' ),
-			'disable_sort' => true,
+			'items'          => 'clicks',
+			'endpoint'       => 'clicks',
+			'singular'       => _x( 'visit', '[FRONTEND] Dashboard table', 'yith-woocommerce-affiliates' ),
+			'plural'         => _x( 'visits', '[FRONTEND] Dashboard table', 'yith-woocommerce-affiliates' ),
+			'disable_sort'   => true,
+			'disable_topbar' => true,
 		)
 	);
 
 	$table->render();
 	?>
+</div>
 <?php endif; ?>

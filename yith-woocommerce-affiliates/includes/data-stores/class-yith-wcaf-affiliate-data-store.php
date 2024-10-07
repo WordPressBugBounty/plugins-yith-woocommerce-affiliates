@@ -36,9 +36,7 @@ if ( ! class_exists( 'YITH_WCAF_Affiliate_Data_Store' ) ) {
 		public function __construct() {
 			global $wpdb;
 
-			// define table.
-			$this->table           = $wpdb->prefix . 'yith_wcaf_affiliates';
-			$wpdb->yith_affiliates = $this->table;
+			$this->table = $wpdb->prefix . 'yith_wcaf_affiliates';
 
 			$this->cache_group = 'affiliates';
 
@@ -179,9 +177,9 @@ if ( ! class_exists( 'YITH_WCAF_Affiliate_Data_Store' ) ) {
 				$query = false;
 
 				if ( $id ) {
-					$query = $wpdb->prepare( "SELECT * FROM {$wpdb->yith_affiliates} WHERE ID = %d", $id );
+					$query = $wpdb->prepare( "SELECT * FROM {$this->table} WHERE ID = %d", $id );
 				} elseif ( $token ) {
-					$query = $wpdb->prepare( "SELECT * FROM {$wpdb->yith_affiliates} WHERE token = %s", $token );
+					$query = $wpdb->prepare( "SELECT * FROM {$this->table} WHERE token = %s", $token );
 				}
 
 				// retrieve affiliate data.
@@ -280,7 +278,7 @@ if ( ! class_exists( 'YITH_WCAF_Affiliate_Data_Store' ) ) {
 			$this->clear_cache( $affiliate );
 
 			// delete affiliate.
-			$res = $wpdb->delete( $wpdb->yith_affiliates, array( 'ID' => $id ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+			$res = $wpdb->delete( $this->table, array( 'ID' => $id ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 
 			if ( $res ) {
 				/**
@@ -324,7 +322,7 @@ if ( ! class_exists( 'YITH_WCAF_Affiliate_Data_Store' ) ) {
 			$token = $this->cache_get( 'token-by-user_id-' . $user_id );
 
 			if ( ! $token ) {
-				$token = $wpdb->get_var( $wpdb->prepare( "SELECT token FROM {$wpdb->yith_affiliates} WHERE user_id = %d", $user_id ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+				$token = $wpdb->get_var( $wpdb->prepare( "SELECT token FROM {$this->table} WHERE user_id = %d", $user_id ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 
 				if ( $token ) {
 					$this->cache_set( 'token-by-user_id-' . $user_id, $token );
@@ -440,222 +438,20 @@ if ( ! class_exists( 'YITH_WCAF_Affiliate_Data_Store' ) ) {
 						u.user_email,
 						u.display_name,
 						u.user_nicename
-					FROM {$wpdb->yith_affiliates} AS ya
-					LEFT JOIN {$wpdb->users} AS u ON u.ID = ya.user_id
-					WHERE 1 = 1";
+					FROM {$this->table} AS ya
+					LEFT JOIN {$wpdb->users} AS u ON u.ID = ya.user_id";
 				$query_args = array();
 
 				if ( $is_counting ) {
 					$query = "SELECT COUNT(*)
-						FROM {$wpdb->yith_affiliates} AS ya
-						LEFT JOIN {$wpdb->users} AS u ON u.ID = ya.user_id
-						WHERE 1 = 1";
+						FROM {$this->table} AS ya
+						LEFT JOIN {$wpdb->users} AS u ON u.ID = ya.user_id";
 				}
 
-				if ( ! empty( $args['ID'] ) ) {
-					$query       .= ' AND ya.ID = %d';
-					$query_args[] = $args['ID'];
-				}
-
-				if ( ! empty( $args['affiliate_id'] ) ) {
-					$query       .= ' AND ya.ID = %d';
-					$query_args[] = $args['affiliate_id'];
-				}
-
-				if ( ! empty( $args['include'] ) ) {
-					$args['include'] = (array) $args['include'];
-
-					$query     .= ' AND ya.ID IN (' . trim( str_repeat( '%d, ', count( $args['include'] ) ), ', ' ) . ')';
-					$query_args = array_merge(
-						$query_args,
-						$args['include']
-					);
-				}
-
-				if ( ! empty( $args['exclude'] ) ) {
-					$args['exclude'] = (array) $args['exclude'];
-
-					$query     .= ' AND ya.ID NOT IN (' . trim( str_repeat( '%d, ', count( $args['exclude'] ) ), ', ' ) . ')';
-					$query_args = array_merge(
-						$query_args,
-						$args['exclude']
-					);
-				}
-
-				if ( ! empty( $args['user_id'] ) ) {
-					$query       .= ' AND ya.user_id = %d';
-					$query_args[] = $args['user_id'];
-				}
-
-				if ( ! empty( $args['user_login'] ) ) {
-					$query       .= ' AND u.user_login LIKE %s';
-					$query_args[] = '%' . $args['user_login'] . '%';
-				}
-
-				if ( ! empty( $args['user_email'] ) ) {
-					$query       .= ' AND u.user_email LIKE %s';
-					$query_args[] = '%' . $args['user_email'] . '%';
-				}
-
-				if ( ! empty( $args['payment_email'] ) ) {
-					$query       .= ' AND ya.payment_email LIKE %s';
-					$query_args[] = '%' . $args['payment_email'] . '%';
-				}
-
-				if ( ! empty( $args['rate'] ) ) {
-					if ( is_array( $args['rate'] ) && ( isset( $args['rate']['min'] ) || isset( $args['rate']['max'] ) ) ) {
-						if ( ! empty( $args['rate']['min'] ) ) {
-							$query       .= ' AND ya.rate >= %f';
-							$query_args[] = $args['rate']['min'];
-						}
-
-						if ( ! empty( $args['rate']['max'] ) ) {
-							$query       .= ' AND ya.rate <= %f';
-							$query_args[] = $args['rate']['max'];
-						}
-					} elseif ( 'NULL' === $args['rate'] ) {
-						$query .= ' AND ya.rate IS NULL';
-					} elseif ( 'NOT NULL' === $args['rate'] ) {
-						$query .= ' AND ya.rate IS NOT NULL';
-					}
-				}
-
-				if ( ! empty( $args['earnings'] ) && is_array( $args['earnings'] ) && ( isset( $args['earnings']['min'] ) || isset( $args['earnings']['max'] ) ) ) {
-					if ( ! empty( $args['earnings']['min'] ) ) {
-						$query       .= ' AND ( ya.earnings + ya.refunds ) >= %f';
-						$query_args[] = $args['earnings']['min'];
-					}
-
-					if ( ! empty( $args['earnings']['max'] ) ) {
-						$query       .= ' AND ( ya.earnings + ya.refunds ) <= %f';
-						$query_args[] = $args['earnings']['max'];
-					}
-				}
-
-				if ( ! empty( $args['paid'] ) && is_array( $args['paid'] ) && ( isset( $args['paid']['min'] ) || isset( $args['paid']['max'] ) ) ) {
-					if ( ! empty( $args['paid']['min'] ) ) {
-						$query       .= ' AND ya.paid >= %f';
-						$query_args[] = $args['paid']['min'];
-					}
-
-					if ( ! empty( $args['paid']['max'] ) ) {
-						$query       .= ' AND ya.paid <= %f';
-						$query_args[] = $args['paid']['max'];
-					}
-				}
-
-				if ( ! empty( $args['balance'] ) && is_array( $args['balance'] ) && ( isset( $args['balance']['min'] ) || isset( $args['balance']['max'] ) ) ) {
-					if ( ! empty( $args['balance']['min'] ) ) {
-						$query       .= ' AND ( ya.earnings - ya.paid ) >= %f';
-						$query_args[] = $args['balance']['min'];
-					}
-
-					if ( ! empty( $args['balance']['max'] ) ) {
-						$query       .= ' AND ( ya.earnings - ya.paid ) <= %f';
-						$query_args[] = $args['balance']['max'];
-					}
-				}
-
-				if ( ! empty( $args['clicks'] ) && is_array( $args['clicks'] ) && ( isset( $args['clicks']['min'] ) || isset( $args['clicks']['max'] ) ) ) {
-					if ( ! empty( $args['clicks']['min'] ) ) {
-						$query       .= ' AND ya.click >= %f';
-						$query_args[] = $args['clicks']['min'];
-					}
-
-					if ( ! empty( $args['clicks']['max'] ) ) {
-						$query       .= ' AND ya.click <= %f';
-						$query_args[] = $args['clicks']['max'];
-					}
-				}
-
-				if ( ! empty( $args['conversion'] ) && is_array( $args['conversion'] ) && ( isset( $args['conversion']['min'] ) || isset( $args['conversion']['max'] ) ) ) {
-					if ( ! empty( $args['conversion']['min'] ) ) {
-						$query       .= ' AND ya.conversion >= %f';
-						$query_args[] = $args['conversion']['min'];
-					}
-
-					if ( ! empty( $args['conversion']['max'] ) ) {
-						$query       .= ' AND ya.conversion <= %f';
-						$query_args[] = $args['conversion']['max'];
-					}
-				}
-
-				if ( ! empty( $args['conv_rate'] ) && is_array( $args['conv_rate'] ) && ( isset( $args['conv_rate']['min'] ) || isset( $args['conv_rate']['max'] ) ) ) {
-					if ( ! empty( $args['conv_rate']['min'] ) ) {
-						$query       .= ' AND ( ya.conversion / ya.click * 100 ) >= %f';
-						$query_args[] = $args['conv_rate']['min'];
-					}
-
-					if ( ! empty( $args['conv_rate']['max'] ) ) {
-						$query       .= ' AND ( ya.conversion / ya.click * 100 ) <= %f';
-						$query_args[] = $args['conv_rate']['max'];
-					}
-				}
-
-				if ( ! empty( $args['enabled'] ) ) {
-					$query .= ' AND ya.enabled = %d';
-					switch ( $args['enabled'] ) {
-						case 'new':
-							$query_args[] = 0;
-							break;
-						case 'disabled':
-							$query_args[] = - 1;
-							break;
-						case 'enabled':
-						default:
-							$query_args[] = 1;
-							break;
-					}
-				}
-
-				if ( ! empty( $args['banned'] ) ) {
-					$query       .= ' AND ya.banned = %d';
-					$query_args[] = 'banned' === $args['banned'] ? 1 : 0;
-				}
-
-				if ( ! empty( $args['s'] ) ) {
-					$query .= " AND (
-						u.user_login LIKE %s OR
-						u.user_email LIKE %s OR
-						ya.token LIKE %s OR
-						ya.payment_email LIKE %s OR
-						ya.user_id IN ( SELECT um.user_id FROM {$wpdb->usermeta} AS um WHERE um.meta_value LIKE %s AND ( um.meta_key = %s OR um.meta_key = %s ) )
-						)";
-
-					$search_string = '%' . $args['s'] . '%';
-					$query_args    = array_merge(
-						$query_args,
-						array(
-							$search_string,
-							$search_string,
-							$search_string,
-							$search_string,
-							$search_string,
-							'first_name',
-							'last_name',
-						)
-					);
-				}
-
-				if ( ! empty( $args['interval'] ) && is_array( $args['interval'] ) && ( isset( $args['interval']['start_date'] ) || isset( $args['interval']['end_date'] ) ) ) {
-					if ( ! empty( $args['interval']['start_date'] ) ) {
-						$query       .= ' AND u.user_registered >= %s';
-						$query_args[] = $args['interval']['start_date'];
-					}
-
-					if ( ! empty( $args['interval']['end_date'] ) ) {
-						$query       .= ' AND u.user_registered <= %s';
-						$query_args[] = $args['interval']['end_date'];
-					}
-				}
-
-				if ( ! empty( $args['orderby'] ) && ! $is_counting ) {
-					$query .= $this->generate_query_orderby_clause( $args['orderby'], $args['order'] );
-				}
-
-				if ( ! empty( $args['limit'] ) && 0 < (int) $args['limit'] && ! $is_counting ) {
-					$query .= sprintf( ' LIMIT %d, %d', ! empty( $args['offset'] ) ? $args['offset'] : 0, $args['limit'] );
-				}
+				// append clauses to the query.
+				$query .= $this->generate_query_where_clause( $args, $query_args );
+				$query .= $this->generate_query_orderby_clause( $args, $query_args );
+				$query .= $this->generate_query_limit_clause( $args, $query_args );
 
 				if ( ! empty( $query_args ) ) {
 					$query = $wpdb->prepare( $query, $query_args ); // phpcs:ignore WordPress.DB
@@ -731,11 +527,11 @@ if ( ! class_exists( 'YITH_WCAF_Affiliate_Data_Store' ) ) {
 				$query_args = array();
 				$query      = "SELECT ya.enabled AS status,
 						COUNT( ya.ID ) AS status_count 
-					FROM {$wpdb->yith_affiliates} AS ya 
+					FROM {$this->table} AS ya 
 					LEFT JOIN {$wpdb->users} AS u ON u.ID = ya.user_id
 					WHERE 1 = 1
 					AND ya.banned = 0";
-				$query2     = "SELECT COUNT( ya.ID ) FROM {$wpdb->yith_affiliates} as ya WHERE ya.banned = 1";
+				$query2     = "SELECT COUNT( ya.ID ) FROM {$this->table} as ya WHERE ya.banned = 1";
 
 				if ( ! empty( $args['s'] ) ) {
 					$search_condition = ' AND ( u.user_login LIKE %s OR u.user_email LIKE %s OR ya.token LIKE %s OR ya.payment_email LIKE %s )';
@@ -790,6 +586,218 @@ if ( ! class_exists( 'YITH_WCAF_Affiliate_Data_Store' ) ) {
 					return 0;
 				}
 			}
+		}
+
+		/**
+		 * Generates where clause for the query, given a set of arguments
+		 *
+		 * @param array $args       Array of query arguments.
+		 * @param array $query_args Array of parameters to build up into the query (reference).
+		 * @return string Where clause.
+		 */
+		protected function generate_query_where_clause( $args = array(), &$query_args = array() ) {
+			global $wpdb;
+
+			$where = ' WHERE 1 = 1';
+
+			if ( ! empty( $args['ID'] ) ) {
+				$where       .= ' AND ya.ID = %d';
+				$query_args[] = $args['ID'];
+			}
+
+			if ( ! empty( $args['affiliate_id'] ) ) {
+				$where       .= ' AND ya.ID = %d';
+				$query_args[] = $args['affiliate_id'];
+			}
+
+			if ( ! empty( $args['include'] ) ) {
+				$args['include'] = (array) $args['include'];
+
+				$where     .= ' AND ya.ID IN (' . trim( str_repeat( '%d, ', count( $args['include'] ) ), ', ' ) . ')';
+				$query_args = array_merge(
+					$query_args,
+					$args['include']
+				);
+			}
+
+			if ( ! empty( $args['exclude'] ) ) {
+				$args['exclude'] = (array) $args['exclude'];
+
+				$where     .= ' AND ya.ID NOT IN (' . trim( str_repeat( '%d, ', count( $args['exclude'] ) ), ', ' ) . ')';
+				$query_args = array_merge(
+					$query_args,
+					$args['exclude']
+				);
+			}
+
+			if ( ! empty( $args['user_id'] ) ) {
+				$where       .= ' AND ya.user_id = %d';
+				$query_args[] = $args['user_id'];
+			}
+
+			if ( ! empty( $args['user_login'] ) ) {
+				$where       .= ' AND u.user_login LIKE %s';
+				$query_args[] = '%' . $args['user_login'] . '%';
+			}
+
+			if ( ! empty( $args['user_email'] ) ) {
+				$where       .= ' AND u.user_email LIKE %s';
+				$query_args[] = '%' . $args['user_email'] . '%';
+			}
+
+			if ( ! empty( $args['payment_email'] ) ) {
+				$where       .= ' AND ya.payment_email LIKE %s';
+				$query_args[] = '%' . $args['payment_email'] . '%';
+			}
+
+			if ( ! empty( $args['rate'] ) ) {
+				if ( is_array( $args['rate'] ) && ( isset( $args['rate']['min'] ) || isset( $args['rate']['max'] ) ) ) {
+					if ( ! empty( $args['rate']['min'] ) ) {
+						$where       .= ' AND ya.rate >= %f';
+						$query_args[] = $args['rate']['min'];
+					}
+
+					if ( ! empty( $args['rate']['max'] ) ) {
+						$where       .= ' AND ya.rate <= %f';
+						$query_args[] = $args['rate']['max'];
+					}
+				} elseif ( 'NULL' === $args['rate'] ) {
+					$where .= ' AND ya.rate IS NULL';
+				} elseif ( 'NOT NULL' === $args['rate'] ) {
+					$where .= ' AND ya.rate IS NOT NULL';
+				}
+			}
+
+			if ( ! empty( $args['earnings'] ) && is_array( $args['earnings'] ) && ( isset( $args['earnings']['min'] ) || isset( $args['earnings']['max'] ) ) ) {
+				if ( ! empty( $args['earnings']['min'] ) ) {
+					$where       .= ' AND ( ya.earnings + ya.refunds ) >= %f';
+					$query_args[] = $args['earnings']['min'];
+				}
+
+				if ( ! empty( $args['earnings']['max'] ) ) {
+					$where       .= ' AND ( ya.earnings + ya.refunds ) <= %f';
+					$query_args[] = $args['earnings']['max'];
+				}
+			}
+
+			if ( ! empty( $args['paid'] ) && is_array( $args['paid'] ) && ( isset( $args['paid']['min'] ) || isset( $args['paid']['max'] ) ) ) {
+				if ( ! empty( $args['paid']['min'] ) ) {
+					$where       .= ' AND ya.paid >= %f';
+					$query_args[] = $args['paid']['min'];
+				}
+
+				if ( ! empty( $args['paid']['max'] ) ) {
+					$where       .= ' AND ya.paid <= %f';
+					$query_args[] = $args['paid']['max'];
+				}
+			}
+
+			if ( ! empty( $args['balance'] ) && is_array( $args['balance'] ) && ( isset( $args['balance']['min'] ) || isset( $args['balance']['max'] ) ) ) {
+				if ( ! empty( $args['balance']['min'] ) ) {
+					$where       .= ' AND ( ya.earnings - ya.paid ) >= %f';
+					$query_args[] = $args['balance']['min'];
+				}
+
+				if ( ! empty( $args['balance']['max'] ) ) {
+					$where       .= ' AND ( ya.earnings - ya.paid ) <= %f';
+					$query_args[] = $args['balance']['max'];
+				}
+			}
+
+			if ( ! empty( $args['clicks'] ) && is_array( $args['clicks'] ) && ( isset( $args['clicks']['min'] ) || isset( $args['clicks']['max'] ) ) ) {
+				if ( ! empty( $args['clicks']['min'] ) ) {
+					$where       .= ' AND ya.click >= %f';
+					$query_args[] = $args['clicks']['min'];
+				}
+
+				if ( ! empty( $args['clicks']['max'] ) ) {
+					$where       .= ' AND ya.click <= %f';
+					$query_args[] = $args['clicks']['max'];
+				}
+			}
+
+			if ( ! empty( $args['conversion'] ) && is_array( $args['conversion'] ) && ( isset( $args['conversion']['min'] ) || isset( $args['conversion']['max'] ) ) ) {
+				if ( ! empty( $args['conversion']['min'] ) ) {
+					$where       .= ' AND ya.conversion >= %f';
+					$query_args[] = $args['conversion']['min'];
+				}
+
+				if ( ! empty( $args['conversion']['max'] ) ) {
+					$where       .= ' AND ya.conversion <= %f';
+					$query_args[] = $args['conversion']['max'];
+				}
+			}
+
+			if ( ! empty( $args['conv_rate'] ) && is_array( $args['conv_rate'] ) && ( isset( $args['conv_rate']['min'] ) || isset( $args['conv_rate']['max'] ) ) ) {
+				if ( ! empty( $args['conv_rate']['min'] ) ) {
+					$where       .= ' AND ( ya.conversion / ya.click * 100 ) >= %f';
+					$query_args[] = $args['conv_rate']['min'];
+				}
+
+				if ( ! empty( $args['conv_rate']['max'] ) ) {
+					$where       .= ' AND ( ya.conversion / ya.click * 100 ) <= %f';
+					$query_args[] = $args['conv_rate']['max'];
+				}
+			}
+
+			if ( ! empty( $args['enabled'] ) ) {
+				$where .= ' AND ya.enabled = %d';
+				switch ( $args['enabled'] ) {
+					case 'new':
+						$query_args[] = 0;
+						break;
+					case 'disabled':
+						$query_args[] = - 1;
+						break;
+					case 'enabled':
+					default:
+						$query_args[] = 1;
+						break;
+				}
+			}
+
+			if ( ! empty( $args['banned'] ) ) {
+				$where       .= ' AND ya.banned = %d';
+				$query_args[] = 'banned' === $args['banned'] ? 1 : 0;
+			}
+
+			if ( ! empty( $args['s'] ) ) {
+				$where .= " AND (
+						u.user_login LIKE %s OR
+						u.user_email LIKE %s OR
+						ya.token LIKE %s OR
+						ya.payment_email LIKE %s OR
+						ya.user_id IN ( SELECT um.user_id FROM {$wpdb->usermeta} AS um WHERE um.meta_value LIKE %s AND ( um.meta_key = %s OR um.meta_key = %s ) )
+						)";
+
+				$search_string = '%' . $args['s'] . '%';
+				$query_args    = array_merge(
+					$query_args,
+					array(
+						$search_string,
+						$search_string,
+						$search_string,
+						$search_string,
+						$search_string,
+						'first_name',
+						'last_name',
+					)
+				);
+			}
+
+			if ( ! empty( $args['interval'] ) && is_array( $args['interval'] ) && ( isset( $args['interval']['start_date'] ) || isset( $args['interval']['end_date'] ) ) ) {
+				if ( ! empty( $args['interval']['start_date'] ) ) {
+					$where       .= ' AND u.user_registered >= %s';
+					$query_args[] = $args['interval']['start_date'];
+				}
+
+				if ( ! empty( $args['interval']['end_date'] ) ) {
+					$where       .= ' AND u.user_registered <= %s';
+					$query_args[] = $args['interval']['end_date'];
+				}
+			}
+
+			return $where;
 		}
 
 		/* === META === */
@@ -949,7 +957,7 @@ if ( ! class_exists( 'YITH_WCAF_Affiliate_Data_Store' ) ) {
 
 			$charset_collate = $wpdb->get_charset_collate();
 
-			return "CREATE TABLE $wpdb->yith_affiliates (
+			return "CREATE TABLE $this->table (
                     ID bigint(20) NOT NULL AUTO_INCREMENT,
                     token varchar(255) NOT NULL,
                     user_id bigint(20) NOT NULL,
@@ -1057,7 +1065,7 @@ if ( ! class_exists( 'YITH_WCAF_Affiliate_Data_Store' ) ) {
 			global $wpdb;
 
 			$suffix = '';
-			$query  = "SELECT ID FROM {$wpdb->yith_affiliates} WHERE token = %s AND ID <> %d LIMIT 1";
+			$query  = "SELECT ID FROM {$this->table} WHERE token = %s AND ID <> %d LIMIT 1";
 
 			do {
 				$generated_token = ! ! $suffix ? "$token-$suffix" : $token;

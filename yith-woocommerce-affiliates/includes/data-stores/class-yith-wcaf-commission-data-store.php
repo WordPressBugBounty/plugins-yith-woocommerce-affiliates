@@ -30,12 +30,8 @@ if ( ! class_exists( 'YITH_WCAF_Commission_Data_Store' ) ) {
 			global $wpdb;
 
 			// define table.
-			$this->table                 = $wpdb->prefix . 'yith_wcaf_commissions';
-			$this->notes_table           = $wpdb->prefix . 'yith_wcaf_commission_notes';
-			$this->affiliates_table      = $wpdb->prefix . 'yith_wcaf_affiliates';
-			$wpdb->yith_commissions      = $this->table;
-			$wpdb->yith_commission_notes = $this->notes_table;
-			$wpdb->yith_affiliates       = $this->affiliates_table;
+			$this->table       = $wpdb->prefix . 'yith_wcaf_commissions';
+			$this->notes_table = $wpdb->prefix . 'yith_wcaf_commission_notes';
 
 			$this->notes_external_reference_column = 'commission_id';
 
@@ -154,7 +150,7 @@ if ( ! class_exists( 'YITH_WCAF_Commission_Data_Store' ) ) {
 
 			if ( ! $commission_data ) {
 				// format query to retrieve commission.
-				$query = $wpdb->prepare( "SELECT * FROM {$wpdb->yith_commissions} WHERE ID = %d", $id );
+				$query = $wpdb->prepare( "SELECT * FROM {$this->table} WHERE ID = %d", $id );
 
 				// retrieve commission data.
 				$commission_data = $wpdb->get_row( $query ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery
@@ -245,7 +241,7 @@ if ( ! class_exists( 'YITH_WCAF_Commission_Data_Store' ) ) {
 			$this->clear_cache( $commission );
 
 			// delete commission.
-			$res = $wpdb->delete( $wpdb->yith_commissions, array( 'ID' => $id ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+			$res = $wpdb->delete( $this->table, array( 'ID' => $id ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 
 			if ( $res ) {
 				/**
@@ -323,8 +319,6 @@ if ( ! class_exists( 'YITH_WCAF_Commission_Data_Store' ) ) {
 		public function query( $args = array() ) {
 			global $wpdb;
 
-			$available_statuses = array_keys( YITH_WCAF_Commissions::get_available_statuses() );
-
 			$defaults = array(
 				'ID'             => false,
 				'include'        => array(),
@@ -360,157 +354,30 @@ if ( ! class_exists( 'YITH_WCAF_Commission_Data_Store' ) ) {
 
 			// if no data found in cache, query database.
 			if ( false === $res ) {
+				// affiliates table name.
+				$affiliates_table = WC_Data_Store::load( 'affiliate' )->get_table();
+
 				$query      = "SELECT
 						yc.*,
 						u.ID AS user_id,
 						u.user_login AS user_login,
 						u.user_email AS user_email
-					FROM {$wpdb->yith_commissions} AS yc
-					LEFT JOIN {$wpdb->yith_affiliates} AS ya ON ya.ID = yc.affiliate_id
-					LEFT JOIN {$wpdb->users} AS u ON u.ID = ya.user_id
-					WHERE 1 = 1";
+					FROM {$this->table} AS yc
+					LEFT JOIN {$affiliates_table} AS ya ON ya.ID = yc.affiliate_id
+					LEFT JOIN {$wpdb->users} AS u ON u.ID = ya.user_id";
 				$query_args = array();
 
 				if ( $is_counting ) {
 					$query = "SELECT COUNT(*)
-						FROM {$wpdb->yith_commissions} AS yc
-						LEFT JOIN {$wpdb->yith_affiliates} AS ya ON ya.ID = yc.affiliate_id
-						LEFT JOIN {$wpdb->users} AS u ON u.ID = ya.user_id
-						WHERE 1 = 1";
+						FROM {$this->table} AS yc
+						LEFT JOIN {$affiliates_table} AS ya ON ya.ID = yc.affiliate_id
+						LEFT JOIN {$wpdb->users} AS u ON u.ID = ya.user_id";
 				}
 
-				if ( ! empty( $args['ID'] ) ) {
-					$query       .= ' AND yc.ID = %d';
-					$query_args[] = $args['ID'];
-				}
-
-				if ( ! empty( $args['include'] ) ) {
-					$args['include'] = (array) $args['include'];
-
-					$query     .= ' AND yc.ID IN (' . trim( str_repeat( '%d, ', count( $args['include'] ) ), ', ' ) . ')';
-					$query_args = array_merge(
-						$query_args,
-						$args['include']
-					);
-				}
-
-				if ( ! empty( $args['exclude'] ) ) {
-					$args['exclude'] = (array) $args['exclude'];
-
-					$query     .= ' AND yc.ID NOT IN (' . trim( str_repeat( '%d, ', count( $args['exclude'] ) ), ', ' ) . ')';
-					$query_args = array_merge(
-						$query_args,
-						$args['exclude']
-					);
-				}
-
-				if ( ! empty( $args['order_id'] ) ) {
-					$query       .= ' AND yc.order_id = %d';
-					$query_args[] = $args['order_id'];
-				}
-
-				if ( ! empty( $args['line_item_id'] ) ) {
-					$query       .= ' AND yc.line_item_id = %d';
-					$query_args[] = $args['line_item_id'];
-				}
-
-				if ( ! empty( $args['user_id'] ) ) {
-					$query       .= ' AND ya.user_id = %d';
-					$query_args[] = $args['user_id'];
-				}
-
-				if ( ! empty( $args['affiliate_id'] ) ) {
-					$query       .= ' AND yc.affiliate_id = %d';
-					$query_args[] = $args['affiliate_id'];
-				}
-
-				if ( ! empty( $args['status'] ) ) {
-					$args['status'] = array_intersect( (array) $args['status'], $available_statuses );
-
-					$query     .= ' AND yc.status IN ( ' . trim( str_repeat( '%s, ', count( $args['status'] ) ), ', ' ) . ' )';
-					$query_args = array_merge(
-						$query_args,
-						$args['status']
-					);
-				}
-
-				if ( ! empty( $args['status__not_in'] ) ) {
-					$args['status__not_in'] = array_intersect( (array) $args['status__not_in'], $available_statuses );
-
-					$query     .= ' AND yc.status NOT IN ( ' . trim( str_repeat( '%s, ', count( $args['status__not_in'] ) ), ', ' ) . ' )';
-					$query_args = array_merge(
-						$query_args,
-						$args['status__not_in']
-					);
-				}
-
-				if ( ! empty( $args['user_login'] ) ) {
-					$query       .= ' AND u.user_login LIKE %s';
-					$query_args[] = '%' . $args['user_login'] . '%';
-				}
-
-				if ( ! empty( $args['user_email'] ) ) {
-					$query       .= ' AND u.user_email LIKE %s';
-					$query_args[] = '%' . $args['user_email'] . '%';
-				}
-
-				if ( ! empty( $args['product_id'] ) ) {
-					$query       .= ' AND yc.product_id = %d';
-					$query_args[] = $args['product_id'];
-				}
-
-				if ( ! empty( $args['product_name'] ) ) {
-					$query       .= ' AND yc.product_name LIKE %s';
-					$query_args[] = '%' . $args['product_name'] . '%';
-				}
-
-				if ( ! empty( $args['rate'] ) && is_array( $args['rate'] ) && ( isset( $args['rate']['min'] ) || isset( $args['rate']['max'] ) ) ) {
-					if ( ! empty( $args['rate']['min'] ) ) {
-						$query       .= ' AND yc.rate >= %f';
-						$query_args[] = $args['rate']['min'];
-					}
-
-					if ( ! empty( $args['rate']['max'] ) ) {
-						$query       .= ' AND yc.rate <= %f';
-						$query_args[] = $args['rate']['max'];
-					}
-				}
-
-				if ( ! empty( $args['amount'] ) && is_array( $args['amount'] ) && ( isset( $args['amount']['min'] ) || isset( $args['amount']['max'] ) ) ) {
-					if ( ! empty( $args['amount']['min'] ) ) {
-						$query       .= ' AND yc.amount >= %f';
-						$query_args[] = $args['amount']['min'];
-					}
-
-					if ( ! empty( $args['amount']['max'] ) ) {
-						$query       .= ' AND yc.amount <= %f';
-						$query_args[] = $args['amount']['max'];
-					}
-				}
-
-				if ( ! empty( $args['interval'] ) && is_array( $args['interval'] ) && ( isset( $args['interval']['start_date'] ) || isset( $args['interval']['end_date'] ) ) ) {
-					if ( ! empty( $args['interval']['start_date'] ) ) {
-						$query       .= ' AND yc.created_at >= %s';
-						$query_args[] = $args['interval']['start_date'];
-					}
-
-					if ( ! empty( $args['interval']['end_date'] ) ) {
-						$query       .= ' AND yc.created_at <= %s';
-						$query_args[] = $args['interval']['end_date'];
-					}
-				}
-
-				if ( empty( $args['fields'] ) || 'count' !== $args['fields'] ) {
-					$query .= ' GROUP BY yc.ID';
-				}
-
-				if ( ! empty( $args['orderby'] ) && ! $is_counting ) {
-					$query .= $this->generate_query_orderby_clause( $args['orderby'], $args['order'], 'query' );
-				}
-
-				if ( ! empty( $args['limit'] ) && 0 < (int) $args['limit'] && ! $is_counting ) {
-					$query .= sprintf( ' LIMIT %d, %d', ! empty( $args['offset'] ) ? $args['offset'] : 0, $args['limit'] );
-				}
+				// append clauses to the query.
+				$query .= $this->generate_query_where_clause( $args, $query_args );
+				$query .= $this->generate_query_orderby_clause( $args, $query_args, 'query' );
+				$query .= $this->generate_query_limit_clause( $args, $query_args );
 
 				if ( ! empty( $query_args ) ) {
 					$query = $wpdb->prepare( $query, $query_args ); // phpcs:ignore WordPress.DB
@@ -626,7 +493,7 @@ if ( ! class_exists( 'YITH_WCAF_Commission_Data_Store' ) ) {
 			if ( ! $res ) {
 				// initialize query parts.
 				$query_select = '';
-				$query_from   = "{$wpdb->yith_commissions} AS yc";
+				$query_from   = "{$this->table} AS yc";
 				$query_where  = '1=1';
 				$query_group  = '';
 				$query_order  = '';
@@ -799,7 +666,7 @@ if ( ! class_exists( 'YITH_WCAF_Commission_Data_Store' ) ) {
 				}
 
 				if ( ! empty( $args['orderby'] ) ) {
-					$query_order .= $this->generate_query_orderby_clause( $args['orderby'], $args['order'], 'stats' );
+					$query_order .= $this->generate_query_orderby_clause( $args, $query_args, 'stats' );
 				}
 
 				if ( ! empty( $args['group_by'] ) && in_array( $args['group_by'], array( 'affiliate_id', 'product_id', 'time_interval' ), true ) ) {
@@ -807,7 +674,7 @@ if ( ! class_exists( 'YITH_WCAF_Commission_Data_Store' ) ) {
 				}
 
 				if ( ! empty( $args['limit'] ) && 0 < (int) $args['limit'] ) {
-					$query_limit .= sprintf( ' LIMIT %d, %d', ! empty( $args['offset'] ) ? $args['offset'] : 0, $args['limit'] );
+					$query_limit .= $this->generate_query_limit_clause( $args, $query_args );
 				}
 
 				// clean components.
@@ -876,11 +743,14 @@ if ( ! class_exists( 'YITH_WCAF_Commission_Data_Store' ) ) {
 
 				$args = wp_parse_args( $args, $defaults );
 
+				// affiliates table name.
+				$affiliates_table = WC_Data_Store::load( 'affiliate' )->get_table();
+
 				$query      = "SELECT
 						yc.status AS status,
 						COUNT( yc.ID ) AS status_count
-					FROM {$wpdb->yith_commissions} AS yc
-					LEFT JOIN {$wpdb->yith_affiliates} AS ya ON ya.ID = yc.affiliate_id
+					FROM {$this->table} AS yc
+					LEFT JOIN {$affiliates_table} AS ya ON ya.ID = yc.affiliate_id
 					WHERE 1 = 1";
 				$query_args = array();
 
@@ -936,6 +806,141 @@ if ( ! class_exists( 'YITH_WCAF_Commission_Data_Store' ) ) {
 					return 0;
 				}
 			}
+		}
+
+		/**
+		 * Generates where clause for the query, given a set of arguments
+		 *
+		 * @param array $args       Array of query arguments.
+		 * @param array $query_args Array of parameters to build up into the query (reference).
+		 * @return string Where clause.
+		 */
+		protected function generate_query_where_clause( $args = array(), &$query_args = array() ) {
+			$where              = ' WHERE 1 = 1';
+			$available_statuses = array_keys( YITH_WCAF_Commissions::get_available_statuses() );
+
+			if ( ! empty( $args['ID'] ) ) {
+				$where       .= ' AND yc.ID = %d';
+				$query_args[] = $args['ID'];
+			}
+
+			if ( ! empty( $args['include'] ) ) {
+				$args['include'] = (array) $args['include'];
+
+				$where     .= ' AND yc.ID IN (' . trim( str_repeat( '%d, ', count( $args['include'] ) ), ', ' ) . ')';
+				$query_args = array_merge(
+					$query_args,
+					$args['include']
+				);
+			}
+
+			if ( ! empty( $args['exclude'] ) ) {
+				$args['exclude'] = (array) $args['exclude'];
+
+				$where     .= ' AND yc.ID NOT IN (' . trim( str_repeat( '%d, ', count( $args['exclude'] ) ), ', ' ) . ')';
+				$query_args = array_merge(
+					$query_args,
+					$args['exclude']
+				);
+			}
+
+			if ( ! empty( $args['order_id'] ) ) {
+				$where       .= ' AND yc.order_id = %d';
+				$query_args[] = $args['order_id'];
+			}
+
+			if ( ! empty( $args['line_item_id'] ) ) {
+				$where       .= ' AND yc.line_item_id = %d';
+				$query_args[] = $args['line_item_id'];
+			}
+
+			if ( ! empty( $args['user_id'] ) ) {
+				$where       .= ' AND ya.user_id = %d';
+				$query_args[] = $args['user_id'];
+			}
+
+			if ( ! empty( $args['affiliate_id'] ) ) {
+				$where       .= ' AND yc.affiliate_id = %d';
+				$query_args[] = $args['affiliate_id'];
+			}
+
+			if ( ! empty( $args['status'] ) ) {
+				$args['status'] = array_intersect( (array) $args['status'], $available_statuses );
+
+				$where     .= ' AND yc.status IN ( ' . trim( str_repeat( '%s, ', count( $args['status'] ) ), ', ' ) . ' )';
+				$query_args = array_merge(
+					$query_args,
+					$args['status']
+				);
+			}
+
+			if ( ! empty( $args['status__not_in'] ) ) {
+				$args['status__not_in'] = array_intersect( (array) $args['status__not_in'], $available_statuses );
+
+				$where     .= ' AND yc.status NOT IN ( ' . trim( str_repeat( '%s, ', count( $args['status__not_in'] ) ), ', ' ) . ' )';
+				$query_args = array_merge(
+					$query_args,
+					$args['status__not_in']
+				);
+			}
+
+			if ( ! empty( $args['user_login'] ) ) {
+				$where       .= ' AND u.user_login LIKE %s';
+				$query_args[] = '%' . $args['user_login'] . '%';
+			}
+
+			if ( ! empty( $args['user_email'] ) ) {
+				$where       .= ' AND u.user_email LIKE %s';
+				$query_args[] = '%' . $args['user_email'] . '%';
+			}
+
+			if ( ! empty( $args['product_id'] ) ) {
+				$where       .= ' AND yc.product_id = %d';
+				$query_args[] = $args['product_id'];
+			}
+
+			if ( ! empty( $args['product_name'] ) ) {
+				$where       .= ' AND yc.product_name LIKE %s';
+				$query_args[] = '%' . $args['product_name'] . '%';
+			}
+
+			if ( ! empty( $args['rate'] ) && is_array( $args['rate'] ) && ( isset( $args['rate']['min'] ) || isset( $args['rate']['max'] ) ) ) {
+				if ( ! empty( $args['rate']['min'] ) ) {
+					$where       .= ' AND yc.rate >= %f';
+					$query_args[] = $args['rate']['min'];
+				}
+
+				if ( ! empty( $args['rate']['max'] ) ) {
+					$where       .= ' AND yc.rate <= %f';
+					$query_args[] = $args['rate']['max'];
+				}
+			}
+
+			if ( ! empty( $args['amount'] ) && is_array( $args['amount'] ) && ( isset( $args['amount']['min'] ) || isset( $args['amount']['max'] ) ) ) {
+				if ( ! empty( $args['amount']['min'] ) ) {
+					$where       .= ' AND yc.amount >= %f';
+					$query_args[] = $args['amount']['min'];
+				}
+
+				if ( ! empty( $args['amount']['max'] ) ) {
+					$where       .= ' AND yc.amount <= %f';
+					$query_args[] = $args['amount']['max'];
+				}
+			}
+
+			if ( ! empty( $args['interval'] ) && is_array( $args['interval'] ) && ( isset( $args['interval']['start_date'] ) || isset( $args['interval']['end_date'] ) ) ) {
+				if ( ! empty( $args['interval']['start_date'] ) ) {
+					$where       .= ' AND yc.created_at >= %s';
+					$query_args[] = $args['interval']['start_date'];
+				}
+
+				if ( ! empty( $args['interval']['end_date'] ) ) {
+					$where       .= ' AND yc.created_at <= %s';
+					$query_args[] = $args['interval']['end_date'];
+				}
+			}
+
+			return $where;
 		}
 
 		/* === ORDER ITEM META === */
@@ -996,7 +1001,7 @@ if ( ! class_exists( 'YITH_WCAF_Commission_Data_Store' ) ) {
 
 			$charset_collate = $wpdb->get_charset_collate();
 
-			return "CREATE TABLE $wpdb->yith_commissions (
+			return "CREATE TABLE $this->table (
                     ID bigint(20) NOT NULL AUTO_INCREMENT,
                     order_id bigint(20) NOT NULL,
                     line_item_id bigint(20) NOT NULL,
@@ -1016,7 +1021,7 @@ if ( ! class_exists( 'YITH_WCAF_Commission_Data_Store' ) ) {
                     KEY external_affiliate (affiliate_id),
                     KEY external_product (product_id)
 				) $charset_collate;
-				CREATE TABLE $wpdb->yith_commission_notes (
+				CREATE TABLE $this->notes_table (
                     ID bigint(20) NOT NULL AUTO_INCREMENT,
                     commission_id bigint(20) NOT NULL,
                     note_content text NOT NULL,

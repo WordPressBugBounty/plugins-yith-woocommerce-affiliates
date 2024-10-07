@@ -245,8 +245,11 @@ if ( ! class_exists( 'YITH_WCAF_Affiliates_Admin_Panel' ) ) {
 
 			// create new affiliate, assign user.
 			if ( ! $affiliate ) {
-				$affiliate = new YITH_WCAF_Affiliate();
-				$affiliate->set_user_id( $customer );
+				$affiliate = YITH_WCAF_Affiliate_Factory::create_affiliate(
+					array(
+						'user_id' => $customer,
+					)
+				);
 			}
 
 			$affiliate->set_status( 'enabled' );

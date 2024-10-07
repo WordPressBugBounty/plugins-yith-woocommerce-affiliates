@@ -482,8 +482,6 @@ if ( ! class_exists( 'YITH_WCAF_Payments' ) ) {
 					}
 
 					foreach ( $payments_to_create as $currency => $payment_args ) {
-						$payment = new YITH_WCAF_Payment();
-
 						$payment_args = array_merge(
 							$payment_args,
 							$payments_args,
@@ -494,7 +492,7 @@ if ( ! class_exists( 'YITH_WCAF_Payments' ) ) {
 
 						unset( $payment_args['payments'] );
 
-						$payment->set_props( $payment_args );
+						$payment = YITH_WCAF_Payment_Factory::create_payment( $payment_args );
 
 						// set gateway data, if any.
 						if ( $gateway_id && class_exists( 'YITH_WCAF_Gateways' ) && YITH_WCAF_Gateways::is_valid_gateway( $gateway_id ) ) {

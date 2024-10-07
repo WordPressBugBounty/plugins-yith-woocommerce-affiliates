@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { createElement } from 'react';
 import { _x } from '@wordpress/i18n';
 import { applyFilters } from '@wordpress/hooks';
 import { useState } from '@wordpress/element';

@@ -188,7 +188,7 @@ if ( ! class_exists( 'YITH_WCAF_Affiliate_Dashboard_Shortcode' ) ) {
 			$affiliate = YITH_WCAF_Affiliate_Factory::get_current_affiliate();
 
 			if ( ! $affiliate || ! $affiliate instanceof YITH_WCAF_Affiliate ) {
-				return;
+				return $atts;
 			}
 
 			$commissions              = array();

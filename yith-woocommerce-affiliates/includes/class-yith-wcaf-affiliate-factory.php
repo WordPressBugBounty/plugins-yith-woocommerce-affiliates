@@ -17,7 +17,14 @@ if ( ! class_exists( 'YITH_WCAF_Affiliate_Factory' ) ) {
 	 *
 	 * @since 2.0.0
 	 */
-	class YITH_WCAF_Affiliate_Factory {
+	class YITH_WCAF_Affiliate_Factory extends YITH_WCAF_Abstract_Object_Factory {
+
+		/**
+		 * Type of objects the factory should build
+		 *
+		 * @var string
+		 */
+		protected static $object_type = 'affiliate';
 
 		/**
 		 * Returns a list of affiliates matching filtering criteria
@@ -27,15 +34,7 @@ if ( ! class_exists( 'YITH_WCAF_Affiliate_Factory' ) ) {
 		 * @return YITH_WCAF_Affiliates_Collection|string[]|bool Result set; false on failure.
 		 */
 		public static function get_affiliates( $args = array() ) {
-			try {
-				$data_store = WC_Data_Store::load( 'affiliate' );
-
-				$res = $data_store->query( $args );
-			} catch ( Exception $e ) {
-				return false;
-			}
-
-			return $res;
+			return self::get_objects( $args );
 		}
 
 		/**
@@ -81,15 +80,7 @@ if ( ! class_exists( 'YITH_WCAF_Affiliate_Factory' ) ) {
 		 * @return YITH_WCAF_Affiliate|bool Affiliate object, or false on failure
 		 */
 		public static function get_affiliate_by_token( $token ) {
-			if ( ! $token ) {
-				return false;
-			}
-
-			try {
-				return new YITH_WCAF_Affiliate( $token );
-			} catch ( Exception $e ) {
-				return false;
-			}
+			return self::get_object( $token );
 		}
 
 		/**
@@ -100,15 +91,7 @@ if ( ! class_exists( 'YITH_WCAF_Affiliate_Factory' ) ) {
 		 * @return YITH_WCAF_Affiliate|bool Affiliate object, or false on failure
 		 */
 		public static function get_affiliate_by_id( $id ) {
-			if ( ! $id ) {
-				return false;
-			}
-
-			try {
-				return new YITH_WCAF_Affiliate( (int) $id );
-			} catch ( Exception $e ) {
-				return false;
-			}
+			return self::get_object( $id );
 		}
 
 		/**
@@ -133,7 +116,7 @@ if ( ! class_exists( 'YITH_WCAF_Affiliate_Factory' ) ) {
 				return false;
 			}
 
-			return self::get_affiliate( $token );
+			return self::get_affiliate_by_token( $token );
 		}
 
 		/**
@@ -145,7 +128,7 @@ if ( ! class_exists( 'YITH_WCAF_Affiliate_Factory' ) ) {
 		 */
 		public static function get_affiliate_by_user_id( $user_id ) {
 			try {
-				$data_store = WC_Data_Store::load( 'affiliate' );
+				$data_store = WC_Data_Store::load( self::$object_type );
 
 				$token = $data_store->get_token_by_user_id( $user_id );
 
@@ -157,6 +140,16 @@ if ( ! class_exists( 'YITH_WCAF_Affiliate_Factory' ) ) {
 			} catch ( Exception $e ) {
 				return false;
 			}
+		}
+
+		/**
+		 * Created a new affiliate object starting from a list of props
+		 *
+		 * @param array $args Array of params used to populate the affiliate object.
+		 * @return YITH_WCAF_Affiliate|bool Affiliate object, or false on failure.
+		 */
+		public static function create_affiliate( $args = array() ) {
+			return self::create_object( $args );
 		}
 
 		/**
@@ -172,9 +165,12 @@ if ( ! class_exists( 'YITH_WCAF_Affiliate_Factory' ) ) {
 
 			if ( ! $affiliate ) {
 				$new_application = true;
-				$affiliate       = new YITH_WCAF_Affiliate();
+				$affiliate       = self::create_affiliate(
+					array(
+						'user_id' => $user_id,
+					)
+				);
 
-				$affiliate->set_user_id( $user_id );
 				$affiliate->update_meta_data( 'application_date', current_time( 'mysql' ) );
 
 				if ( yith_plugin_fw_is_true( get_option( 'yith_wcaf_referral_registration_auto_enable' ) ) ) {

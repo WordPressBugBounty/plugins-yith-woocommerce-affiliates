@@ -30,6 +30,9 @@ if ( ! class_exists( 'YITH_WCAF_Affiliates_Profile' ) ) {
 		 * Init profile handling
 		 */
 		public static function init() {
+			// register custom field types.
+			add_filter( 'woocommerce_form_field_multicheck', array( self::class, 'show_multicheck' ), 10, 4 );
+
 			// show fields.
 			add_action( 'woocommerce_register_form', array( self::class, 'show_fields' ) );
 			add_action( 'yith_wcaf_register_form', array( self::class, 'show_fields' ) );
@@ -55,17 +58,18 @@ if ( ! class_exists( 'YITH_WCAF_Affiliates_Profile' ) ) {
 			return apply_filters(
 				'yith_wcaf_affiliates_profile_supported_field_types',
 				array(
-					'text'     => esc_attr_x( 'Text', '[ADMIN] Add Affiliate field modal', 'yith-woocommerce-affiliates' ),
-					'email'    => esc_attr_x( 'Email', '[ADMIN] Add Affiliate field modal', 'yith-woocommerce-affiliates' ),
-					'password' => esc_attr_x( 'Password', '[ADMIN] Add Affiliate field modal', 'yith-woocommerce-affiliates' ),
-					'tel'      => esc_attr_x( 'Phone', '[ADMIN] Add Affiliate field modal', 'yith-woocommerce-affiliates' ),
-					'textarea' => esc_attr_x( 'Textarea', '[ADMIN] Add Affiliate field modal', 'yith-woocommerce-affiliates' ),
-					'radio'    => esc_attr_x( 'Radio button', '[ADMIN] Add Affiliate field modal', 'yith-woocommerce-affiliates' ),
-					'checkbox' => esc_attr_x( 'Checkbox', '[ADMIN] Add Affiliate field modal', 'yith-woocommerce-affiliates' ),
-					'select'   => esc_attr_x( 'Select', '[ADMIN] Add Affiliate field modal', 'yith-woocommerce-affiliates' ),
-					'country'  => esc_attr_x( 'Country', '[ADMIN] Add Affiliate field modal', 'yith-woocommerce-affiliates' ),
-					'state'    => esc_attr_x( 'State', '[ADMIN] Add Affiliate field modal', 'yith-woocommerce-affiliates' ),
-					'date'     => esc_attr_x( 'Date', '[ADMIN] Add Affiliate field modal', 'yith-woocommerce-affiliates' ),
+					'text'       => esc_attr_x( 'Text', '[ADMIN] Add Affiliate field modal', 'yith-woocommerce-affiliates' ),
+					'email'      => esc_attr_x( 'Email', '[ADMIN] Add Affiliate field modal', 'yith-woocommerce-affiliates' ),
+					'password'   => esc_attr_x( 'Password', '[ADMIN] Add Affiliate field modal', 'yith-woocommerce-affiliates' ),
+					'tel'        => esc_attr_x( 'Phone', '[ADMIN] Add Affiliate field modal', 'yith-woocommerce-affiliates' ),
+					'textarea'   => esc_attr_x( 'Textarea', '[ADMIN] Add Affiliate field modal', 'yith-woocommerce-affiliates' ),
+					'radio'      => esc_attr_x( 'Radio button', '[ADMIN] Add Affiliate field modal', 'yith-woocommerce-affiliates' ),
+					'checkbox'   => esc_attr_x( 'Checkbox', '[ADMIN] Add Affiliate field modal', 'yith-woocommerce-affiliates' ),
+					'multicheck' => esc_attr_x( 'Multi Checkbox', '[ADMIN] Add Affiliate field modal', 'yith-woocommerce-affiliates' ),
+					'select'     => esc_attr_x( 'Select', '[ADMIN] Add Affiliate field modal', 'yith-woocommerce-affiliates' ),
+					'country'    => esc_attr_x( 'Country', '[ADMIN] Add Affiliate field modal', 'yith-woocommerce-affiliates' ),
+					'state'      => esc_attr_x( 'State', '[ADMIN] Add Affiliate field modal', 'yith-woocommerce-affiliates' ),
+					'date'       => esc_attr_x( 'Date', '[ADMIN] Add Affiliate field modal', 'yith-woocommerce-affiliates' ),
 				)
 			);
 		}
@@ -114,6 +118,62 @@ if ( ! class_exists( 'YITH_WCAF_Affiliates_Profile' ) ) {
 					'become_an_affiliate' => esc_html_x( 'Show also in the Become an Affiliate form', '[ADMIN] Add Affiliate field modal', 'yith-woocommerce-affiliates' ),
 				)
 			);
+		}
+
+		/* === CUSTOM FIELDS === */
+
+		/**
+		 * Prints a MultiCheckbox field
+		 *
+		 * Uses the same logic applied in \woocommerce_form_field to show custom multi-check field.
+		 *
+		 * @param string $field Field html; ignored.
+		 * @param string $key   Field key.
+		 * @param array  $args  Array of configuration for the field.
+		 * @param array  $value  Field value.
+		 *
+		 * @return string Field HTML.
+		 */
+		public static function show_multicheck( $field, $key, $args, $value ) {
+			$label_id          = $args['id'];
+			$label             = wp_kses_post( $args['label'] );
+			$container_id      = esc_attr( $args['id'] ) . '_field';
+			$container_class   = esc_attr( implode( ' ', $args['class'] ) );
+			$label_class       = esc_attr( implode( ' ', $args['label_class'] ) );
+			$sort              = $args['priority'] ? esc_attr( $args['priority'] ) : '';
+			$custom_attributes = array();
+			$description_html  = $args['description']
+				? '<span class="description" id="' . esc_attr( $args['id'] ) . '-description" aria-hidden="true">' . wp_kses_post( $args['description'] ) . '</span>'
+				: '';
+			$required          = $args['required']
+				? '&nbsp;<abbr class="required" title="' . esc_attr__( 'required', 'woocommerce' ) . '">*</abbr>'
+				: '&nbsp;<span class="optional">(' . esc_html__( 'optional', 'woocommerce' ) . ')</span>';
+
+			if ( ! empty( $args['custom_attributes'] ) && is_array( $args['custom_attributes'] ) ) {
+				foreach ( $args['custom_attributes'] as $attribute => $attribute_value ) {
+					$custom_attributes[] = esc_attr( $attribute ) . '="' . esc_attr( $attribute_value ) . '"';
+				}
+			}
+
+			$value      = (array) $value;
+			$field_html = '';
+
+			if ( ! empty( $args['options'] ) ) {
+				foreach ( $args['options'] as $option_key => $option_text ) {
+					$field_html .= '<input type="checkbox" class="input-checkbox ' . esc_attr( implode( ' ', $args['input_class'] ) ) . '" value="' . esc_attr( $option_key ) . '" ' . implode( ' ', $custom_attributes ) . ' name="' . esc_attr( $key ) . '[]" id="' . esc_attr( $args['id'] ) . '_' . esc_attr( $option_key ) . '"' . checked( in_array( $option_key, $value, true ), true, false ) . ' />';
+					$field_html .= '<label for="' . esc_attr( $args['id'] ) . '_' . esc_attr( $option_key ) . '" class="input-checkbox ' . implode( ' ', $args['label_class'] ) . '">' . esc_html( $option_text ) . '</label>';
+				}
+			}
+
+			return <<<EOHTML
+				<p class="form-row multi-check $container_class" id="$container_id" data-priority="$sort">
+					<label for="$label_id" class="$label_class">$label $required</label>
+					<span class="woocommerce-input-wrapper">
+						$field_html
+						$description_html
+					</span>
+				</p>
+			EOHTML;
 		}
 
 		/* === PRINT METHODS === */
@@ -187,9 +247,14 @@ if ( ! class_exists( 'YITH_WCAF_Affiliates_Profile' ) ) {
 				 */
 				$field['required'] = apply_filters( "yith_wcaf_{$field_key}_required", $field['required'], $field );
 
+				$field['custom_attributes'] = $field['custom_attributes'] ?? array();
+
 				if ( ! empty( $field['error_message'] ) ) {
-					$field['custom_attributes']               = array();
 					$field['custom_attributes']['data-error'] = $field['error_message'];
+				}
+
+				if ( 'text' !== $field['validation'] ) {
+					$field['custom_attributes']['data-validation'] = $field['validation'];
 				}
 
 				if ( ! in_array( $field['type'], array_keys( self::get_supported_field_types() ), true ) ) {
@@ -197,7 +262,11 @@ if ( ! class_exists( 'YITH_WCAF_Affiliates_Profile' ) ) {
 					continue;
 				}
 
-				woocommerce_form_field( $field_name, $field, YITH_WCAF_Form_Handler::get_posted_data( $field_name, $field_default ) );
+				$field_value = YITH_WCAF_Form_Handler::get_posted_data( $field_name, $field_default );
+
+				do_action( 'yith_wcaf_before_profile_field', $field, $field_key, $field_name, $field_value, $affiliate );
+				woocommerce_form_field( $field_name, $field, $field_value );
+				do_action( 'yith_wcaf_after_profile_field', $field, $field_key, $field_name, $field_value, $affiliate );
 			}
 
 			self::maybe_close_form_container();
@@ -244,7 +313,6 @@ if ( ! class_exists( 'YITH_WCAF_Affiliates_Profile' ) ) {
 			}
 
 			return $fields;
-
 		}
 
 		/**
@@ -279,10 +347,11 @@ if ( ! class_exists( 'YITH_WCAF_Affiliates_Profile' ) ) {
 		 *
 		 * @param string              $field_key Key of the field.
 		 * @param YITH_WCAF_Affiliate $affiliate Affiliate object.
+		 * @param string              $context   Context of the operation; when view, value will be formatted for human consumption.
 		 *
 		 * @return mixed Value to use for the field.
 		 */
-		public static function get_field_value( $field_key, $affiliate = null ) {
+		public static function get_field_value( $field_key, $affiliate = null, $context = 'edit' ) {
 			$value = null;
 
 			if ( $affiliate ) {
@@ -294,6 +363,37 @@ if ( ! class_exists( 'YITH_WCAF_Affiliates_Profile' ) ) {
 				$value = $user ? $user->$field_key : $value;
 			}
 
+			// format value when in view mode and field require formatting.
+			if ( 'view' === $context ) {
+				$field = self::get_field( $field_key, $context );
+
+				// get field details.
+				list( $type, $options ) = yith_plugin_fw_extract( $field, 'type', 'options' );
+
+				switch ( $type ) {
+					case 'select':
+					case 'radio':
+						if ( $options && isset( $options[ $value ] ) ) {
+							$value = $options[ $value ];
+							break;
+						}
+
+						$value = '-';
+
+						break;
+					case 'multicheck':
+						$value = array_filter( array_map( fn ( $option ) => $options[ $option ] ?? false, (array) $value ) );
+						break;
+					case 'checkbox':
+						if ( '' === $value ) {
+							$value = _x( 'N/A', '[ADMIN] Profile fields checkbox values', 'yith-woocommerce-affiliates' );
+						} else {
+							$value = ! ! $value ? _x( 'Accepted', '[ADMIN] Profile fields checkbox values', 'yith-woocommerce-affiliates' ) : _x( 'Rejected', '[ADMIN] Profile fields checkbox values', 'yith-woocommerce-affiliates' );
+						}
+						break;
+				}
+			}
+
 			/**
 			 * APPLY_FILTERS: yith_wcaf_$field_key_value
 			 *
@@ -302,8 +402,9 @@ if ( ! class_exists( 'YITH_WCAF_Affiliates_Profile' ) ) {
 			 *
 			 * @param string              $field_value Field value.
 			 * @param YITH_WCAF_Affiliate $affiliate   Affiliate object.
+			 * @param string              $context     Context of the operation.
 			 */
-			return apply_filters( "yith_wcaf_{$field_key}_value", $value, $affiliate );
+			return apply_filters( "yith_wcaf_{$field_key}_value", $value, $affiliate, $context );
 		}
 
 		/**
@@ -407,7 +508,7 @@ if ( ! class_exists( 'YITH_WCAF_Affiliates_Profile' ) ) {
 			 *
 			 * @param array $fields Fields.
 			 */
-			return apply_filters( 'yith_wcaf_affiliate_profile_fields', $fields );
+			return apply_filters( 'yith_wcaf_affiliate_profile_fields', $fields, $context, $args );
 		}
 
 		/**
@@ -902,17 +1003,20 @@ if ( ! class_exists( 'YITH_WCAF_Affiliates_Profile' ) ) {
 					$option_name .= '_defaults';
 				}
 
-				// retrieve stored option, and parse items to match basic structure.
-				$profile_fields = array_map(
-					array(
-						self::class,
-						'parse_field',
-					),
-					get_option( $option_name, array() )
+				// retrieve stored option, remove fields that lack a name.
+				$profile_fields = array_filter(
+					get_option( $option_name, array() ),
+					fn ( $field ) => ! ! $field['name']
 				);
 
 				// use fields names as index for profile_field array.
 				$profile_fields = array_combine( wp_list_pluck( $profile_fields, 'name' ), $profile_fields );
+				$profile_fields = apply_filters( 'yith_wcaf_raw_affiliate_profile_fields', $profile_fields, $restore_defaults );
+
+				// parse fields to make sure all have the same basic structure.
+				foreach ( $profile_fields as $field_key => $field ) {
+					$profile_fields[ $field_key ] = self::parse_field( $field );
+				}
 
 				self::$profile_fields = $profile_fields;
 			}

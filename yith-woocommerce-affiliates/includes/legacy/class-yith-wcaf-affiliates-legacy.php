@@ -60,7 +60,7 @@ if ( ! class_exists( 'YITH_WCAF_Affiliates_Legacy' ) ) {
 			_deprecated_function( __METHOD__, '2.0.0', '\YITH_WCAF_Affiliate_Data_Store::create' );
 
 			try {
-				$affiliate = new YITH_WCAF_Affiliate( $affiliate_args );
+				$affiliate = YITH_WCAF_Affiliate_Factory::create_affiliate( $affiliate_args );
 				$affiliate->save();
 			} catch ( Exception $e ) {
 				return false;

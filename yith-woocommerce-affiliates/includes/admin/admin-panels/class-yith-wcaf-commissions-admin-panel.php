@@ -148,7 +148,7 @@ if ( ! class_exists( 'YITH_WCAF_Commissions_Admin_Panel' ) ) {
 		/**
 		 * Render the Affiliates Commissions List tab.
 		 */
-		public function render_list_table(){
+		public function render_list_table() {
 			$list_table = $this->get_list_table();
 
 			$list_table->prepare_items();
@@ -287,6 +287,8 @@ if ( ! class_exists( 'YITH_WCAF_Commissions_Admin_Panel' ) ) {
 
 			$commissions = new YITH_WCAF_Commissions_Collection( $commissions );
 
+			$gateway_id = false;
+
 			// check if we're processing custom payment action, and set required variables.
 			if ( preg_match( '^pay_via_([a-zA-Z_-]*)$^', $current_action, $matches ) ) {
 				$current_action = 'pay';
@@ -307,7 +309,7 @@ if ( ! class_exists( 'YITH_WCAF_Commissions_Admin_Panel' ) ) {
 
 						$commission->set_status( $new_status, $message );
 						$commission->save();
-						$updated ++;
+						$updated++;
 					}
 					break;
 				case 'move_to_trash':
@@ -319,7 +321,7 @@ if ( ! class_exists( 'YITH_WCAF_Commissions_Admin_Panel' ) ) {
 					foreach ( $commissions as $commission ) {
 						$commission->trash( $message );
 						$commission->save();
-						$updated ++;
+						$updated++;
 					}
 					break;
 				case 'restore':
@@ -336,7 +338,7 @@ if ( ! class_exists( 'YITH_WCAF_Commissions_Admin_Panel' ) ) {
 						$message = sprintf( _x( '%1$s restored this item; the system automatically assigned %2$s status.', '[ADMIN] Status change note', 'yith-woocommerce-affiliates' ), $user->user_login, YITH_WCAF_Commissions::get_readable_status( $commission->get_status() ) );
 						$commission->add_note( $message );
 						$commission->save();
-						$updated ++;
+						$updated++;
 					}
 					break;
 				case 'delete':
@@ -344,7 +346,7 @@ if ( ! class_exists( 'YITH_WCAF_Commissions_Admin_Panel' ) ) {
 
 					foreach ( $commissions as $commission ) {
 						$commission->delete( true );
-						$updated ++;
+						$updated++;
 					}
 					break;
 				case 'pay':

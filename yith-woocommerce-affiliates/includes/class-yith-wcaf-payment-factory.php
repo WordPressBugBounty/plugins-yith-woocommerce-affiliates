@@ -17,7 +17,14 @@ if ( ! class_exists( 'YITH_WCAF_Payment_Factory' ) ) {
 	 *
 	 * @since 2.0.0
 	 */
-	class YITH_WCAF_Payment_Factory {
+	class YITH_WCAF_Payment_Factory extends YITH_WCAF_Abstract_Object_Factory {
+
+		/**
+		 * Type of objects the factory should build
+		 *
+		 * @var string
+		 */
+		protected static $object_type = 'payment';
 
 		/**
 		 * Returns a list of payments matching filtering criteria
@@ -27,15 +34,7 @@ if ( ! class_exists( 'YITH_WCAF_Payment_Factory' ) ) {
 		 * @return YITH_WCAF_Payments_Collection|string[]|bool Result set; false on failure.
 		 */
 		public static function get_payments( $args = array() ) {
-			try {
-				$data_store = WC_Data_Store::load( 'payment' );
-
-				$res = $data_store->query( $args );
-			} catch ( Exception $e ) {
-				return false;
-			}
-
-			return $res;
+			return self::get_objects( $args );
 		}
 
 		/**
@@ -46,15 +45,17 @@ if ( ! class_exists( 'YITH_WCAF_Payment_Factory' ) ) {
 		 * @return YITH_WCAF_Payment|bool Payment object, or false on failure
 		 */
 		public static function get_payment( $id ) {
-			if ( ! $id ) {
-				return false;
-			}
+			return self::get_object( $id );
+		}
 
-			try {
-				return new YITH_WCAF_Payment( $id );
-			} catch ( Exception $e ) {
-				return false;
-			}
+		/**
+		 * Created a new payment object starting from a list of props
+		 *
+		 * @param array $args Array of params used to populate the payment object.
+		 * @return YITH_WCAF_Payment|bool Payment object, or false on failure.
+		 */
+		public static function create_payment( $args = array() ) {
+			return self::create_object( $args );
 		}
 	}
 }

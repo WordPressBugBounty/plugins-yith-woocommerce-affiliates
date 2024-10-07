@@ -45,7 +45,7 @@ if ( ! class_exists( 'YITH_WCAF_Payments_Legacy' ) ) {
 			_deprecated_function( __METHOD__, '2.0.0', '\YITH_WCAF_Payment_Data_Store::create' );
 
 			try {
-				$payment = new YITH_WCAF_Payment( $args );
+				$payment = YITH_WCAF_Payment_Factory::create_payment( $args );
 				$payment->set_commissions( $commissions );
 				$payment->save();
 			} catch ( Exception $e ) {

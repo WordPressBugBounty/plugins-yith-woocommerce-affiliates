@@ -17,7 +17,14 @@ if ( ! class_exists( 'YITH_WCAF_Click_Factory' ) ) {
 	 *
 	 * @since 2.0.0
 	 */
-	class YITH_WCAF_Click_Factory {
+	class YITH_WCAF_Click_Factory extends YITH_WCAF_Abstract_Object_Factory {
+
+		/**
+		 * Type of objects the factory should build
+		 *
+		 * @var string
+		 */
+		protected static $object_type = 'click';
 
 		/**
 		 * Returns a list of click matching filtering criteria
@@ -27,34 +34,28 @@ if ( ! class_exists( 'YITH_WCAF_Click_Factory' ) ) {
 		 * @return YITH_WCAF_Clicks_Collection|string[]|bool Result set; false on failure.
 		 */
 		public static function get_clicks( $args = array() ) {
-			try {
-				$data_store = WC_Data_Store::load( 'click' );
-
-				$res = $data_store->query( $args );
-			} catch ( Exception $e ) {
-				return false;
-			}
-
-			return $res;
+			return self::get_objects( $args );
 		}
 
 		/**
 		 * Returns a click, given the id
 		 *
-		 * @param int $id Clicks's ID.
+		 * @param int $id Click's ID.
 		 *
 		 * @return YITH_WCAF_Click|bool Click object, or false on failure
 		 */
 		public static function get_click( $id ) {
-			if ( ! $id ) {
-				return false;
-			}
+			return self::get_object( $id );
+		}
 
-			try {
-				return new YITH_WCAF_Click( $id );
-			} catch ( Exception $e ) {
-				return false;
-			}
+		/**
+		 * Created a new click object starting from a list of props
+		 *
+		 * @param array $args Array of params used to populate the click object.
+		 * @return YITH_WCAF_Click|bool Click object, or false on failure.
+		 */
+		public static function create_click( $args = array() ) {
+			return self::create_object( $args );
 		}
 	}
 }

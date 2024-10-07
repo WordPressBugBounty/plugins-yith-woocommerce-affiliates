@@ -90,7 +90,7 @@ if ( ! class_exists( 'YITH_WCAF_Affiliate_Legacy' ) ) {
 
 			// return empty object when no occurrence found.
 			if ( ! $affiliate ) {
-				return new YITH_WCAF_Affiliate();
+				return YITH_WCAF_Affiliate_Factory::create_affiliate();
 			}
 
 			return $affiliate;

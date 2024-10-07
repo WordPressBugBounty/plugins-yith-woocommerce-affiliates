@@ -108,17 +108,24 @@ if ( ! class_exists( 'YITH_WCAF_Scripts' ) ) {
 		 * ]
 		 */
 		public static function get_metadata( $handle, $section = '', $additional_deps = array() ) {
-			$path  = self::get_relative_path( $handle, $section );
-			$path  = str_replace( array( '.min.js', '.js' ), '.asset.php', $path );
-			$path  = YITH_WCAF_DIR . $path;
-			$asset = file_exists( $path ) ? (array) require $path : array();
-			$asset = array_merge_recursive(
-				$asset,
-				array(
-					'dependencies' => $additional_deps,
-					'version'      => YITH_WCAF::VERSION,
-				)
+			$path     = self::get_relative_path( $handle, $section );
+			$path     = str_replace( array( '.min.js', '.js' ), '.asset.php', $path );
+			$path     = YITH_WCAF_DIR . $path;
+			$asset    = file_exists( $path ) ? (array) require $path : array();
+			$defaults = array(
+				'dependencies' => $additional_deps,
+				'version'      => YITH_WCAF::VERSION,
 			);
+
+			foreach ( array_unique( array_merge( array_keys( $asset ), array_keys( $defaults ) ) ) as $key ) {
+				if ( ! isset( $asset[ $key ] ) ) {
+					$asset[ $key ] = $defaults[ $key ];
+				}
+
+				if ( isset( $asset[ $key ] ) && is_array( $asset[ $key ] ) && isset( $defaults[ $key ] ) ) {
+					$asset[ $key ] = array_unique( array_merge( $asset[ $key ], (array) $defaults[ $key ] ) );
+				}
+			}
 
 			return $asset;
 		}

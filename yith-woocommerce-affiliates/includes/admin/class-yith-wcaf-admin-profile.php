@@ -410,6 +410,7 @@ if ( ! class_exists( 'YITH_WCAF_Admin_Profile' ) ) {
 					list( $label, $admin_label, $value, $class ) = yith_plugin_fw_extract( $field, 'label', 'admin_label', 'value', 'class' );
 
 					$admin_label = $admin_label ? $admin_label : $label;
+					$value       = is_array( $value ) ? implode( ', ', $value ) : $value;
 					?>
 					<p class="form-row <?php echo esc_attr( $class ); ?>">
 						<b class="label">
@@ -479,6 +480,9 @@ if ( ! class_exists( 'YITH_WCAF_Admin_Profile' ) ) {
 
 						$value = '-';
 
+						break;
+					case 'multicheck':
+						$value = array_filter( array_map( fn ( $option ) => $options[ $option ] ?? false, (array) $value ) );
 						break;
 					case 'checkbox':
 						if ( '' === $value ) {
@@ -572,6 +576,8 @@ if ( ! class_exists( 'YITH_WCAF_Admin_Profile' ) ) {
 				$field['type']        = 'onoff';
 				$field['desc-inline'] = $description ?? $field['label'];
 				$field['class']       = yith_plugin_fw_is_true( $raw_value ) ? 'accepted-condition' : 'rejected-condition';
+			} elseif ( 'multicheck' === $type ) {
+				$field['type'] = 'checkbox-array';
 			} elseif ( 'select' === $type ) {
 				$field['type'] = $type;
 
@@ -658,8 +664,11 @@ if ( ! class_exists( 'YITH_WCAF_Admin_Profile' ) ) {
 
 			// create affiliate if it doesn't exists.
 			if ( $is_affiliate && ! $affiliate ) {
-				$affiliate = new YITH_WCAF_Affiliate();
-				$affiliate->set_user_id( $user_id );
+				$affiliate = YITH_WCAF_Affiliate_Factory::create_affiliate(
+					array(
+						'user_id' => $user_id,
+					)
+				);
 				$affiliate->save();
 			}
 

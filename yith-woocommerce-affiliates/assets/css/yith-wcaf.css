@@ -77,7 +77,7 @@
  */
 .yith-wcaf-modal {
   background: #fff;
-  border-radius: 10px;
+  border-radius: var(--yith-wcaf-dashboard--border-radius, 10px);
   display: none;
   left: 50%;
   max-height: 90vh;
@@ -121,8 +121,8 @@
   width: 6px;
 }
 .yith-wcaf-modal .content::-webkit-scrollbar-thumb {
-  background-color: var(--proteo-main_color_shade, #448a85);
-  border-radius: 10px;
+  background-color: var(--yith-wcaf-dashboard--accent-color, var(--proteo-main_color_shade, #448a85));
+  border-radius: var(--yith-wcaf-dashboard--border-radius, 10px);
 }
 .yith-wcaf-modal .errors {
   margin-bottom: 15px;
@@ -220,7 +220,7 @@
   max-width: 300px;
   font-size: 0.85em;
   padding: 10px;
-  border: 1px solid #ccc;
+  border: 1px solid var(--yith-wcaf-dashboard--border-color, #ccc);
   margin-top: 5px;
 }
 .yith-wcaf-datepicker.ui-datepicker .ui-datepicker-header {
@@ -258,15 +258,17 @@
   background-color: #f7f7f7;
   border: 1px solid transparent;
 }
-.yith-wcaf-datepicker.ui-datepicker table td:hover, .yith-wcaf-datepicker.ui-datepicker table td.ui-datepicker-current-day {
-  color: #fff;
-  border-color: var(--proteo-main_color_shade, #448a85);
-  background-color: var(--proteo-main_color_shade, #448a85);
-}
 .yith-wcaf-datepicker.ui-datepicker table td a {
   padding: 0 5px;
   display: block;
   color: #707070;
+}
+.yith-wcaf-datepicker.ui-datepicker table td:not(.ui-datepicker-other-month):hover, .yith-wcaf-datepicker.ui-datepicker table td:not(.ui-datepicker-other-month).ui-datepicker-current-day {
+  border-color: var(--yith-wcaf-dashboard--accent-color, var(--proteo-main_color_shade, #448a85));
+  background-color: var(--yith-wcaf-dashboard--accent-color, var(--proteo-main_color_shade, #448a85));
+}
+.yith-wcaf-datepicker.ui-datepicker table td:not(.ui-datepicker-other-month):hover a, .yith-wcaf-datepicker.ui-datepicker table td:not(.ui-datepicker-other-month).ui-datepicker-current-day a {
+  color: #fff;
 }
 .yith-wcaf-datepicker.ui-datepicker .ui-datepicker-buttonpane {
   padding-top: 10px;
@@ -293,7 +295,7 @@
  */
 .yith-wcaf-notice-message {
   background-color: #F0F5FA;
-  border-radius: 4px;
+  border-radius: var(--yith-wcaf-border--radius, 4px);
   font-style: italic;
   padding: 15px 20px;
 }
@@ -399,7 +401,7 @@
 }
 .yith-wcaf-dashboard ul.yith-wcaf-dashboard-navigation:after {
   bottom: 0;
-  border-bottom: 1px solid #ccc;
+  border-bottom: 1px solid var(--yith-wcaf-dashboard--border-color, #ccc);
   content: "";
   left: 0;
   position: absolute;
@@ -414,74 +416,351 @@
   display: block;
   padding: 10px 15px;
   text-decoration: none;
-  color: var(--proteo-base_font_color, #404040);
+  color: var(--yith-wcaf-dashboard--color, var(--proteo-base_font_color, #404040));
 }
 .yith-wcaf-dashboard ul.yith-wcaf-dashboard-navigation li a:hover {
-  color: var(--proteo-main_color_shade, #448a85);
+  color: var(--yith-wcaf-dashboard--accent-color, var(--proteo-main_color_shade, #448a85));
 }
 .yith-wcaf-dashboard ul.yith-wcaf-dashboard-navigation li.is-active {
-  border-bottom: 2px solid var(--proteo-main_color_shade, #448a85);
+  border-bottom: 2px solid var(--yith-wcaf-dashboard--accent-color, var(--proteo-main_color_shade, #448a85));
 }
 .yith-wcaf-dashboard ul.yith-wcaf-dashboard-navigation li.is-active a {
-  color: var(--proteo-main_color_shade, #448a85);
+  color: var(--yith-wcaf-dashboard--accent-color, var(--proteo-main_color_shade, #448a85));
 }
 .yith-wcaf-dashboard .yith-wcaf-table-top-bar {
   margin: 30px 0;
 }
+.yith-wcaf-dashboard .yith-wcaf-table-top-bar form {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.yith-wcaf-dashboard .yith-wcaf-table-top-bar form .table-filters {
+  flex-grow: 1;
+}
 .yith-wcaf-dashboard .yith-wcaf-table-top-bar input,
 .yith-wcaf-dashboard .yith-wcaf-table-top-bar select,
-.yith-wcaf-dashboard .yith-wcaf-table-top-bar .select2 {
+.yith-wcaf-dashboard .yith-wcaf-table-top-bar .select2,
+.yith-wcaf-dashboard .yith-wcaf-table-top-bar .apply-filters,
+.yith-wcaf-dashboard .yith-wcaf-table-top-bar .reset-filters {
   display: inline-block;
   margin-left: 5px;
-  max-width: 170px;
+  max-width: 130px;
   min-width: 0;
+  vertical-align: middle;
 }
-.yith-wcaf-dashboard .yith-wcaf-table-top-bar .table-filters,
-.yith-wcaf-dashboard .yith-wcaf-table-top-bar .table-options {
-  display: inline-block;
+.yith-wcaf-dashboard .yith-wcaf-table-top-bar select,
+.yith-wcaf-dashboard .yith-wcaf-table-top-bar .select2 {
+  max-width: 200px;
 }
-.yith-wcaf-dashboard .yith-wcaf-table-top-bar .pull-right {
-  float: right;
+.yith-wcaf-dashboard .yith-wcaf-table-top-bar .quantity-input {
+  max-width: 75px;
 }
 .yith-wcaf-dashboard .yith-wcaf-dashboard-summary .affiliate-stats {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   grid-template-rows: 1fr;
-  grid-column-gap: 60px;
-  margin-bottom: 45px;
+  grid-gap: 40px;
+  margin-bottom: 85px;
 }
 .yith-wcaf-dashboard .yith-wcaf-dashboard-summary .affiliate-stats .stat-box {
-  border: 1px solid #ccc;
-  border-radius: 10px;
+  border: 1px solid var(--yith-wcaf-dashboard--border-color, #ccc);
+  border-radius: var(--yith-wcaf-dashboard--border-radius, 10px);
 }
 .yith-wcaf-dashboard .yith-wcaf-dashboard-summary .affiliate-stats .stat-box .stat-item {
-  border-bottom: 1px solid #ccc;
+  display: grid;
   padding: 10px 30px;
+  border-bottom: 1px solid var(--yith-wcaf-dashboard--border-color, #ccc);
+  justify-content: space-between;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  align-items: center;
 }
 .yith-wcaf-dashboard .yith-wcaf-dashboard-summary .affiliate-stats .stat-box .stat-item:last-child {
   border-bottom: none;
 }
+.yith-wcaf-dashboard .yith-wcaf-dashboard-summary .affiliate-stats .stat-box .stat-item.highlight {
+  border-radius: var(--yith-wcaf-dashboard--border-radius, 10px);
+  background-color: var(--yith-wcaf-background-color, #F3F3F3);
+  padding: 15px;
+}
 .yith-wcaf-dashboard .yith-wcaf-dashboard-summary .affiliate-stats .stat-box .stat-item.large {
+  grid-template-columns: 1fr;
   padding: 30px;
   text-align: center;
-}
-.yith-wcaf-dashboard .yith-wcaf-dashboard-summary .affiliate-stats .stat-box .stat-item.large .stat-label {
-  display: block;
-  margin-bottom: 10px;
+  flex-direction: column;
 }
 .yith-wcaf-dashboard .yith-wcaf-dashboard-summary .affiliate-stats .stat-box .stat-item.large .stat-value {
-  display: block;
-  float: none;
   font-size: 2.5em;
   text-align: center;
 }
+.yith-wcaf-dashboard .yith-wcaf-dashboard-summary .affiliate-stats .stat-box .stat-item.affiliate-active-balance .stat-label {
+  text-align: left;
+}
+.yith-wcaf-dashboard .yith-wcaf-dashboard-summary .affiliate-stats .stat-box .stat-item.affiliate-active-balance .stat-value {
+  font-size: 1em;
+  text-align: right;
+}
+.yith-wcaf-dashboard .yith-wcaf-dashboard-summary .affiliate-stats .stat-box .stat-item.affiliate-active-balance #withdraw_modal_opener_wrapper {
+  grid-column-end: span 2;
+}
+.yith-wcaf-dashboard .yith-wcaf-dashboard-summary .affiliate-stats .stat-box .stat-item.affiliate-active-balance #withdraw_modal_opener_wrapper.disabled {
+  cursor: not-allowed;
+}
+.yith-wcaf-dashboard .yith-wcaf-dashboard-summary .affiliate-stats .stat-box .stat-item.affiliate-active-balance #withdraw_modal_opener_wrapper #withdraw_modal_opener {
+  display: block;
+}
 .yith-wcaf-dashboard .yith-wcaf-dashboard-summary .affiliate-stats .stat-box .stat-item .stat-label {
-  color: var(--proteo-main_color_shade, #448a85);
-  font-weight: 700;
+  color: var(--yith-wcaf-dashboard--accent-color, var(--proteo-main_color_shade, #448a85));
+  font-weight: var(--yith-wcaf-dashboard-font-weight--bold, 700);
+  position: relative;
+}
+.yith-wcaf-dashboard .yith-wcaf-dashboard-summary .affiliate-stats .stat-box .stat-item .stat-label .desc-tip {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10;
+}
+.yith-wcaf-dashboard .yith-wcaf-dashboard-summary .affiliate-stats .stat-box .stat-item .stat-label .desc-tip .tooltip {
+  text-align: left;
 }
 .yith-wcaf-dashboard .yith-wcaf-dashboard-summary .affiliate-stats .stat-box .stat-item .stat-value {
-  float: right;
-  font-weight: 700;
+  font-weight: var(--yith-wcaf-dashboard-font-weight--semi-bold, 500);
+  text-align: right;
+}
+.yith-wcaf-dashboard .yith-wcaf-dashboard-summary .latest-commissions,
+.yith-wcaf-dashboard .yith-wcaf-dashboard-summary .latest-clicks {
+  margin-bottom: 60px;
+}
+.yith-wcaf-dashboard .yith-wcaf-dashboard-summary #withdraw_modal {
+  display: none;
+  /**
+   * Fields CSS
+   *
+   * @author  YITH <plugins@yithemes.com>
+   * @package YITH\Affiliates\Styles
+   * @version 2.0.0
+   */
+  /**
+   * General variables
+   *
+   * @author  YITH <plugins@yithemes.com>
+   * @package YITH\Affiliates\Styles
+   * @version 2.0.0
+   */
+  /**
+   * == GENERAL ===
+   */
+  /**
+   * === STATUS COLORS ===
+   */
+  /**
+   * === ADMIN ===
+   */
+  /**
+   * === DASHBOARD ===
+   */
+}
+.yith-wcaf-dashboard .yith-wcaf-dashboard-summary #withdraw_modal h4 {
+  margin: 15px 0;
+}
+.yith-wcaf-dashboard .yith-wcaf-dashboard-summary #withdraw_modal small {
+  display: block;
+  margin: 15px 0;
+}
+.yith-wcaf-dashboard .yith-wcaf-dashboard-summary #withdraw_modal .balance-recap {
+  background: url(../images/money.svg);
+  background-repeat: no-repeat;
+  background-size: auto 50%;
+  background-position: 30px;
+  border: 1px solid var(--yith-wcaf-dashboard--accent-color, var(--proteo-main_color_shade, #448a85));
+  border-radius: var(--yith-wcaf-dashboard--border-radius, 10px);
+  margin-bottom: 25px;
+  padding: 15px 10px;
+  padding-left: 120px;
+}
+.yith-wcaf-dashboard .yith-wcaf-dashboard-summary #withdraw_modal .balance-recap h4 {
+  margin: 0;
+}
+.yith-wcaf-dashboard .yith-wcaf-dashboard-summary #withdraw_modal .balance-recap .affiliate-balance {
+  font-size: 30px;
+  font-weight: var(--yith-wcaf-dashboard-font-weight--bold, 700);
+}
+.yith-wcaf-dashboard .yith-wcaf-dashboard-summary #withdraw_modal .balance-recap .affiliate-balance .woocommerce-Price-currencySymbol {
+  margin-right: 10px;
+}
+.yith-wcaf-dashboard .yith-wcaf-dashboard-summary #withdraw_modal .withdraw-amount {
+  margin-bottom: 25px;
+  white-space: nowrap;
+}
+.yith-wcaf-dashboard .yith-wcaf-dashboard-summary #withdraw_modal .withdraw-amount .woocommerce-Price-currencySymbol {
+  display: inline-block;
+  font-size: 24px;
+  line-height: 1;
+  vertical-align: middle;
+  width: 25px;
+}
+.yith-wcaf-dashboard .yith-wcaf-dashboard-summary #withdraw_modal .withdraw-amount input {
+  padding: 15px 10px;
+  width: calc(100% - 30px);
+}
+.yith-wcaf-dashboard .yith-wcaf-dashboard-summary #withdraw_modal .withdraw-notes {
+  display: block;
+  margin-bottom: 35px;
+}
+.yith-wcaf-dashboard .yith-wcaf-dashboard-summary #withdraw_modal .withdraw-notes .error {
+  color: var(--yith-wcaf-dashboard--error, #f44336);
+}
+.yith-wcaf-dashboard .yith-wcaf-dashboard-summary #withdraw_modal .billing-info {
+  margin-bottom: 35px;
+}
+.yith-wcaf-dashboard .yith-wcaf-dashboard-summary #withdraw_modal .formatted-address {
+  background: #f2f2f2;
+  border-radius: var(--yith-wcaf-border--radius, 4px);
+  color: #5B5B5B;
+  font-size: 12px;
+  display: block;
+  line-height: 1.6;
+  padding: 15px;
+  text-decoration: none;
+  margin-bottom: 15px;
+}
+.yith-wcaf-dashboard .yith-wcaf-dashboard-summary #withdraw_modal .missing-address {
+  background: #f2f2f2;
+  border-radius: var(--yith-wcaf-border--radius, 4px);
+  color: #5B5B5B;
+  font-size: 12px;
+  display: block;
+  line-height: 1.6;
+  padding: 15px;
+  text-decoration: none;
+  color: #f44336;
+}
+.yith-wcaf-dashboard .yith-wcaf-dashboard-summary #withdraw_modal .invoice-modes {
+  list-style: none;
+  margin-bottom: 35px;
+  padding: 0;
+}
+.yith-wcaf-dashboard .yith-wcaf-dashboard-summary #withdraw_modal .invoice-modes label {
+  cursor: pointer;
+}
+.yith-wcaf-dashboard .yith-wcaf-dashboard-summary #withdraw_modal .invoice-modes .invoice-mode-content {
+  margin-bottom: 30px;
+  padding-left: 30px;
+}
+.yith-wcaf-dashboard .yith-wcaf-dashboard-summary #withdraw_modal .invoice-modes:not(.both) .invoice-mode > label {
+  display: none;
+  padding: 0;
+}
+.yith-wcaf-dashboard .yith-wcaf-dashboard-summary #withdraw_modal .invoice-modes:not(.both) .invoice-mode .invoice-mode-content {
+  padding-left: 0;
+}
+.yith-wcaf-dashboard .yith-wcaf-dashboard-summary #withdraw_modal .invoice-modes .yith-wcaf-attach-file:before {
+  background: url(../images/clip.svg);
+  background-size: 100% auto;
+  content: "";
+  display: inline-block;
+  height: 23px;
+  margin-left: -5px;
+  width: 23px;
+  vertical-align: middle;
+}
+.yith-wcaf-dashboard .yith-wcaf-dashboard-summary #withdraw_modal .invoice-modes #invoice_file {
+  display: none;
+}
+.yith-wcaf-dashboard .yith-wcaf-dashboard-summary #withdraw_modal .invoice-modes #invoice_type_field {
+  margin-bottom: 15px;
+}
+.yith-wcaf-dashboard .yith-wcaf-dashboard-summary #withdraw_modal .invoice-modes #invoice_type_field > span {
+  column-gap: 30px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+}
+.yith-wcaf-dashboard .yith-wcaf-dashboard-summary #withdraw_modal .invoice-modes #invoice_type_field > span .col1,
+.yith-wcaf-dashboard .yith-wcaf-dashboard-summary #withdraw_modal .invoice-modes #invoice_type_field > span .col2 {
+  position: relative;
+}
+.yith-wcaf-dashboard .yith-wcaf-dashboard-summary #withdraw_modal .invoice-modes #invoice_type_field > span .col1 > input, .yith-wcaf-dashboard .yith-wcaf-dashboard-summary #withdraw_modal .invoice-modes #invoice_type_field > span .col1 > .radiobutton,
+.yith-wcaf-dashboard .yith-wcaf-dashboard-summary #withdraw_modal .invoice-modes #invoice_type_field > span .col2 > input,
+.yith-wcaf-dashboard .yith-wcaf-dashboard-summary #withdraw_modal .invoice-modes #invoice_type_field > span .col2 > .radiobutton {
+  position: absolute;
+  left: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+.yith-wcaf-dashboard .yith-wcaf-dashboard-summary #withdraw_modal .invoice-modes #invoice_type_field > span .col1 label,
+.yith-wcaf-dashboard .yith-wcaf-dashboard-summary #withdraw_modal .invoice-modes #invoice_type_field > span .col2 label {
+  border: 1px solid var(--yith-wcaf-dashboard--border-color, #ccc);
+  cursor: pointer;
+  display: block;
+  line-height: 1;
+  margin: 0;
+  padding: 15px 15px 15px 45px;
+}
+.yith-wcaf-dashboard .yith-wcaf-dashboard-summary #withdraw_modal .invoice-modes .files-list {
+  color: #666;
+  display: inline-block;
+  font-style: italic;
+  margin: 0 5px;
+  max-width: 150px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+.yith-wcaf-dashboard .yith-wcaf-dashboard-summary #withdraw_modal .invoice-modes .files-list:before {
+  content: "( ";
+}
+.yith-wcaf-dashboard .yith-wcaf-dashboard-summary #withdraw_modal .invoice-modes .files-list:after {
+  content: " )";
+}
+.yith-wcaf-dashboard .yith-wcaf-dashboard-summary #withdraw_modal .submit {
+  display: block;
+  margin-bottom: 0;
+  padding: 15px 25px;
+  width: 100%;
+}
+.yith-wcaf-dashboard .yith-wcaf-dashboard-summary #withdraw_modal p.form-row {
+  position: relative;
+}
+.yith-wcaf-dashboard .yith-wcaf-dashboard-summary #withdraw_modal p.form-row .password-wrapper {
+  display: block;
+  position: relative;
+}
+.yith-wcaf-dashboard .yith-wcaf-dashboard-summary #withdraw_modal p.form-row .password-wrapper input[type=password] {
+  padding-right: 40px;
+}
+.yith-wcaf-dashboard .yith-wcaf-dashboard-summary #withdraw_modal p.form-row .password-wrapper .toggle-button {
+  font-size: 0;
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+.yith-wcaf-dashboard .yith-wcaf-dashboard-summary #withdraw_modal p.form-row .password-wrapper .toggle-button.click-to-show svg path {
+  fill: var(--yith-wcaf-text-color--light, #A0A0A0);
+}
+.yith-wcaf-dashboard .yith-wcaf-dashboard-summary #withdraw_modal p.form-row .password-wrapper .toggle-button.click-to-hide svg path {
+  fill: var(--yith-wcaf-dashboard--accent-color, var(--proteo-main_color_shade, #448a85));
+}
+.yith-wcaf-dashboard .yith-wcaf-dashboard-summary #withdraw_modal p.form-row .terms-label,
+.yith-wcaf-dashboard .yith-wcaf-dashboard-summary #withdraw_modal p.form-row .woocommerce-privacy-policy-text {
+  font-size: 0.9em;
+}
+.yith-wcaf-dashboard .yith-wcaf-dashboard-summary #withdraw_modal p.form-row span.optional {
+  display: none;
+}
+.yith-wcaf-dashboard .yith-wcaf-dashboard-summary #withdraw_modal p.form-row textarea {
+  height: 140px;
+}
+.yith-wcaf-dashboard .yith-wcaf-dashboard-summary #withdraw_modal p.form-row .error-msg {
+  bottom: -25px;
+  color: var(--yith-wcaf-dashboard--error, #f44336);
+  font-size: 0.75em;
+  left: 15px;
+  position: absolute;
 }
 .yith-wcaf-dashboard .yith-wcaf-dashboard-coupons table.yith-wcaf-table .copy-field-wrapper {
   display: block;
@@ -533,7 +812,7 @@
   border-radius: 2px;
   cursor: pointer;
   display: block;
-  font-weight: 700;
+  font-weight: var(--yith-wcaf-dashboard-font-weight--bold, 700);
   padding: 10px;
   position: static;
   text-decoration: none;
@@ -543,223 +822,6 @@
   left: auto;
   right: 10px;
   transform: translateY(-50%);
-}
-.yith-wcaf-dashboard .yith-wcaf-dashboard-payments #withdraw_modal_opener {
-  margin-left: 5px;
-  margin-right: 0;
-}
-.yith-wcaf-dashboard .yith-wcaf-dashboard-payments #withdraw_modal {
-  display: none;
-  /**
-   * Fields CSS
-   *
-   * @author  YITH <plugins@yithemes.com>
-   * @package YITH\Affiliates\Styles
-   * @version 2.0.0
-   */
-  /**
-   * General variables
-   *
-   * @author  YITH <plugins@yithemes.com>
-   * @package YITH\Affiliates\Styles
-   * @version 2.0.0
-   */
-  /**
-   * == GENERAL ===
-   */
-  /**
-   * === STATUS COLORS ===
-   */
-  /**
-   * === ADMIN ===
-   */
-  /**
-   * === DASHBOARD ===
-   */
-}
-.yith-wcaf-dashboard .yith-wcaf-dashboard-payments #withdraw_modal h4 {
-  margin: 15px 0;
-}
-.yith-wcaf-dashboard .yith-wcaf-dashboard-payments #withdraw_modal small {
-  display: block;
-  margin: 15px 0;
-}
-.yith-wcaf-dashboard .yith-wcaf-dashboard-payments #withdraw_modal .formatted-address {
-  background: #f2f2f2;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  color: #5B5B5B;
-  font-size: 12px;
-  display: block;
-  line-height: 1.6;
-  margin-bottom: 15px;
-  padding: 15px;
-  text-decoration: none;
-}
-.yith-wcaf-dashboard .yith-wcaf-dashboard-payments #withdraw_modal .missing-address {
-  color: #f44336;
-}
-.yith-wcaf-dashboard .yith-wcaf-dashboard-payments #withdraw_modal .balance-recap {
-  background: url(../images/money.svg);
-  background-repeat: no-repeat;
-  background-size: auto 50%;
-  background-position: 30px;
-  border: 1px solid var(--proteo-main_color_shade, #448a85);
-  border-radius: 10px;
-  margin-bottom: 15px;
-  padding: 15px 10px;
-  padding-left: 120px;
-}
-.yith-wcaf-dashboard .yith-wcaf-dashboard-payments #withdraw_modal .balance-recap h4 {
-  margin: 0;
-}
-.yith-wcaf-dashboard .yith-wcaf-dashboard-payments #withdraw_modal .balance-recap .affiliate-balance {
-  font-size: 30px;
-  font-weight: 700;
-}
-.yith-wcaf-dashboard .yith-wcaf-dashboard-payments #withdraw_modal .balance-recap .affiliate-balance .woocommerce-Price-currencySymbol {
-  margin-right: 10px;
-}
-.yith-wcaf-dashboard .yith-wcaf-dashboard-payments #withdraw_modal .withdraw-notes {
-  display: block;
-  margin-bottom: 15px;
-}
-.yith-wcaf-dashboard .yith-wcaf-dashboard-payments #withdraw_modal .withdraw-amount {
-  margin-bottom: 15px;
-  white-space: nowrap;
-}
-.yith-wcaf-dashboard .yith-wcaf-dashboard-payments #withdraw_modal .withdraw-amount .woocommerce-Price-currencySymbol {
-  display: inline-block;
-  font-size: 24px;
-  line-height: 1;
-  vertical-align: middle;
-  width: 25px;
-}
-.yith-wcaf-dashboard .yith-wcaf-dashboard-payments #withdraw_modal .withdraw-amount input {
-  padding: 15px 10px;
-  width: calc(100% - 30px);
-}
-.yith-wcaf-dashboard .yith-wcaf-dashboard-payments #withdraw_modal .invoice-modes {
-  padding: 0;
-  list-style: none;
-}
-.yith-wcaf-dashboard .yith-wcaf-dashboard-payments #withdraw_modal .invoice-modes label {
-  cursor: pointer;
-}
-.yith-wcaf-dashboard .yith-wcaf-dashboard-payments #withdraw_modal .invoice-modes .invoice-mode-content {
-  margin-bottom: 15px;
-  padding-left: 30px;
-}
-.yith-wcaf-dashboard .yith-wcaf-dashboard-payments #withdraw_modal .invoice-modes:not(.both) .invoice-mode > label {
-  display: none;
-  padding: 0;
-}
-.yith-wcaf-dashboard .yith-wcaf-dashboard-payments #withdraw_modal .invoice-modes:not(.both) .invoice-mode .invoice-mode-content {
-  padding-left: 0;
-}
-.yith-wcaf-dashboard .yith-wcaf-dashboard-payments #withdraw_modal .invoice-modes .yith-wcaf-attach-file:before {
-  background: url(../images/clip.svg);
-  background-size: 100% auto;
-  content: "";
-  display: inline-block;
-  height: 23px;
-  width: 23px;
-  vertical-align: middle;
-}
-.yith-wcaf-dashboard .yith-wcaf-dashboard-payments #withdraw_modal .invoice-modes #invoice_file {
-  display: none;
-}
-.yith-wcaf-dashboard .yith-wcaf-dashboard-payments #withdraw_modal .invoice-modes #invoice_type_field {
-  margin-bottom: 15px;
-}
-.yith-wcaf-dashboard .yith-wcaf-dashboard-payments #withdraw_modal .invoice-modes #invoice_type_field > span {
-  column-gap: 30px;
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-}
-.yith-wcaf-dashboard .yith-wcaf-dashboard-payments #withdraw_modal .invoice-modes #invoice_type_field > span .col1,
-.yith-wcaf-dashboard .yith-wcaf-dashboard-payments #withdraw_modal .invoice-modes #invoice_type_field > span .col2 {
-  border: 1px solid #ccc;
-  cursor: pointer;
-  position: relative;
-}
-.yith-wcaf-dashboard .yith-wcaf-dashboard-payments #withdraw_modal .invoice-modes #invoice_type_field > span .col1 > input, .yith-wcaf-dashboard .yith-wcaf-dashboard-payments #withdraw_modal .invoice-modes #invoice_type_field > span .col1 > .radiobutton,
-.yith-wcaf-dashboard .yith-wcaf-dashboard-payments #withdraw_modal .invoice-modes #invoice_type_field > span .col2 > input,
-.yith-wcaf-dashboard .yith-wcaf-dashboard-payments #withdraw_modal .invoice-modes #invoice_type_field > span .col2 > .radiobutton {
-  position: absolute;
-  top: 10px;
-  left: 15px;
-}
-.yith-wcaf-dashboard .yith-wcaf-dashboard-payments #withdraw_modal .invoice-modes #invoice_type_field > span .col1 label,
-.yith-wcaf-dashboard .yith-wcaf-dashboard-payments #withdraw_modal .invoice-modes #invoice_type_field > span .col2 label {
-  cursor: pointer;
-  display: block;
-  line-height: 1;
-  margin: 0;
-  padding: 15px 15px 15px 45px;
-}
-.yith-wcaf-dashboard .yith-wcaf-dashboard-payments #withdraw_modal .invoice-modes .files-list {
-  color: #666;
-  display: inline-block;
-  font-style: italic;
-  margin: 0 5px;
-  max-width: 150px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  vertical-align: middle;
-  white-space: nowrap;
-}
-.yith-wcaf-dashboard .yith-wcaf-dashboard-payments #withdraw_modal .invoice-modes .files-list:before {
-  content: "( ";
-}
-.yith-wcaf-dashboard .yith-wcaf-dashboard-payments #withdraw_modal .invoice-modes .files-list:after {
-  content: " )";
-}
-.yith-wcaf-dashboard .yith-wcaf-dashboard-payments #withdraw_modal .submit {
-  display: block;
-  margin-bottom: 0;
-  padding: 15px 25px;
-  width: 100%;
-}
-.yith-wcaf-dashboard .yith-wcaf-dashboard-payments #withdraw_modal p.form-row {
-  position: relative;
-}
-.yith-wcaf-dashboard .yith-wcaf-dashboard-payments #withdraw_modal p.form-row .password-wrapper {
-  display: block;
-  position: relative;
-}
-.yith-wcaf-dashboard .yith-wcaf-dashboard-payments #withdraw_modal p.form-row .password-wrapper input[type=password] {
-  padding-right: 40px;
-}
-.yith-wcaf-dashboard .yith-wcaf-dashboard-payments #withdraw_modal p.form-row .password-wrapper .toggle-button {
-  font-size: 0;
-  position: absolute;
-  right: 10px;
-  top: 50%;
-  transform: translateY(-50%);
-}
-.yith-wcaf-dashboard .yith-wcaf-dashboard-payments #withdraw_modal p.form-row .password-wrapper .toggle-button.click-to-show svg path {
-  fill: #A0A0A0;
-}
-.yith-wcaf-dashboard .yith-wcaf-dashboard-payments #withdraw_modal p.form-row .password-wrapper .toggle-button.click-to-hide svg path {
-  fill: var(--proteo-main_color_shade, #448a85);
-}
-.yith-wcaf-dashboard .yith-wcaf-dashboard-payments #withdraw_modal p.form-row .terms-label,
-.yith-wcaf-dashboard .yith-wcaf-dashboard-payments #withdraw_modal p.form-row .woocommerce-privacy-policy-text {
-  font-size: 0.9em;
-}
-.yith-wcaf-dashboard .yith-wcaf-dashboard-payments #withdraw_modal p.form-row span.optional {
-  display: none;
-}
-.yith-wcaf-dashboard .yith-wcaf-dashboard-payments #withdraw_modal p.form-row textarea {
-  height: 140px;
-}
-.yith-wcaf-dashboard .yith-wcaf-dashboard-payments #withdraw_modal p.form-row .error-msg {
-  bottom: -25px;
-  color: #f44336;
-  font-size: 0.75em;
-  left: 15px;
-  position: absolute;
 }
 .yith-wcaf-dashboard .yith-wcaf-dashboard-settings {
   /**
@@ -803,17 +865,17 @@
   border-top: none;
 }
 .yith-wcaf-dashboard .yith-wcaf-dashboard-settings .affiliate-settings-box.double-column .additional-info .settings-box:first-child {
-  border-top: 1px solid #ccc;
-  border-top-left-radius: 10px;
-  border-top-right-radius: 10px;
+  border-top: 1px solid var(--yith-wcaf-dashboard--border-color, #ccc);
+  border-top-left-radius: var(--yith-wcaf-dashboard--border-radius, 10px);
+  border-top-right-radius: var(--yith-wcaf-dashboard--border-radius, 10px);
 }
 .yith-wcaf-dashboard .yith-wcaf-dashboard-settings .affiliate-settings-box.double-column .additional-info .settings-box:last-child {
-  border-bottom-left-radius: 10px;
-  border-bottom-right-radius: 10px;
+  border-bottom-left-radius: var(--yith-wcaf-dashboard--border-radius, 10px);
+  border-bottom-right-radius: var(--yith-wcaf-dashboard--border-radius, 10px);
 }
 .yith-wcaf-dashboard .yith-wcaf-dashboard-settings .affiliate-settings-box .settings-box {
-  border: 1px solid #ccc;
-  border-radius: 10px;
+  border: 1px solid var(--yith-wcaf-dashboard--border-color, #ccc);
+  border-radius: var(--yith-wcaf-dashboard--border-radius, 10px);
   padding: 10px 30px;
   margin-bottom: 30px;
 }
@@ -838,19 +900,19 @@
 }
 .yith-wcaf-dashboard .yith-wcaf-dashboard-settings .affiliate-settings-box #invoice_type_field > span .col1,
 .yith-wcaf-dashboard .yith-wcaf-dashboard-settings .affiliate-settings-box #invoice_type_field > span .col2 {
-  border: 1px solid #ccc;
-  cursor: pointer;
   position: relative;
 }
 .yith-wcaf-dashboard .yith-wcaf-dashboard-settings .affiliate-settings-box #invoice_type_field > span .col1 > input, .yith-wcaf-dashboard .yith-wcaf-dashboard-settings .affiliate-settings-box #invoice_type_field > span .col1 > .radiobutton,
 .yith-wcaf-dashboard .yith-wcaf-dashboard-settings .affiliate-settings-box #invoice_type_field > span .col2 > input,
 .yith-wcaf-dashboard .yith-wcaf-dashboard-settings .affiliate-settings-box #invoice_type_field > span .col2 > .radiobutton {
   position: absolute;
-  top: 10px;
   left: 15px;
+  top: 50%;
+  transform: translateY(-50%);
 }
 .yith-wcaf-dashboard .yith-wcaf-dashboard-settings .affiliate-settings-box #invoice_type_field > span .col1 label,
 .yith-wcaf-dashboard .yith-wcaf-dashboard-settings .affiliate-settings-box #invoice_type_field > span .col2 label {
+  border: 1px solid var(--yith-wcaf-dashboard--border-color, #ccc);
   cursor: pointer;
   display: block;
   line-height: 1;
@@ -884,10 +946,10 @@
   transform: translateY(-50%);
 }
 .yith-wcaf-dashboard .yith-wcaf-dashboard-settings p.form-row .password-wrapper .toggle-button.click-to-show svg path {
-  fill: #A0A0A0;
+  fill: var(--yith-wcaf-text-color--light, #A0A0A0);
 }
 .yith-wcaf-dashboard .yith-wcaf-dashboard-settings p.form-row .password-wrapper .toggle-button.click-to-hide svg path {
-  fill: var(--proteo-main_color_shade, #448a85);
+  fill: var(--yith-wcaf-dashboard--accent-color, var(--proteo-main_color_shade, #448a85));
 }
 .yith-wcaf-dashboard .yith-wcaf-dashboard-settings p.form-row .terms-label,
 .yith-wcaf-dashboard .yith-wcaf-dashboard-settings p.form-row .woocommerce-privacy-policy-text {
@@ -901,7 +963,7 @@
 }
 .yith-wcaf-dashboard .yith-wcaf-dashboard-settings p.form-row .error-msg {
   bottom: -25px;
-  color: #f44336;
+  color: var(--yith-wcaf-dashboard--error, #f44336);
   font-size: 0.75em;
   left: 15px;
   position: absolute;
@@ -910,14 +972,14 @@
   position: relative;
 }
 .yith-wcaf-dashboard [data-tip] .tooltip {
-  background: #434343;
-  border-radius: 3px;
+  background: rgba(0, 0, 0, 0.8);
+  border-radius: 5px;
   color: #fff;
   display: block;
-  font-size: 0.8em;
+  font-size: 0.8rem;
   font-weight: 400;
   left: calc(50% - 100px);
-  padding: 5px 10px;
+  padding: 15px;
   position: absolute;
   text-align: center;
   top: calc(100% + 10px);
@@ -926,7 +988,7 @@
 }
 .yith-wcaf-dashboard [data-tip] .tooltip:before {
   border: 5px solid transparent;
-  border-bottom-color: #434343;
+  border-bottom-color: rgba(0, 0, 0, 0.8);
   content: "";
   display: block;
   height: 1px;
@@ -936,11 +998,32 @@
   top: -10px;
   width: 1px;
 }
+.yith-wcaf-dashboard .desc-tip {
+  line-height: 20px;
+  font-size: 0.8em;
+}
+.yith-wcaf-dashboard .desc-tip:before {
+  border: 2px solid;
+  border-color: var(--yith-wcaf-dashboard--border-color, #ccc);
+  border-radius: 50%;
+  color: var(--yith-wcaf-dashboard--border-color, #ccc);
+  content: "?";
+  display: inline-block;
+  font-weight: 600;
+  line-height: 16px;
+  text-align: center;
+  vertical-align: middle;
+  width: 20px;
+}
+.yith-wcaf-dashboard .desc-tip:hover:before {
+  border-color: var(--yith-wcaf-dashboard--color, var(--proteo-base_font_color, #404040));
+  color: var(--yith-wcaf-dashboard--color, var(--proteo-base_font_color, #404040));
+}
 .yith-wcaf-dashboard .yith-wcaf-toggle {
   display: none;
 }
 .yith-wcaf-dashboard .yith-wcaf-toggle + .toggle {
-  border: 1px solid #ccc;
+  border: 1px solid var(--yith-wcaf-dashboard--border-color, #ccc);
   border-radius: 15px;
   cursor: pointer;
   display: inline-block;
@@ -954,7 +1037,7 @@
   content: attr(data-text-off);
 }
 .yith-wcaf-dashboard .yith-wcaf-toggle + .toggle:after {
-  background-color: #ccc;
+  background-color: var(--yith-wcaf-dashboard--border-color, #ccc);
   border-radius: 100%;
   content: "";
   display: block;
@@ -966,8 +1049,8 @@
   width: 20px;
 }
 .yith-wcaf-dashboard .yith-wcaf-toggle:checked + .toggle {
-  border: 1px solid var(--proteo-main_color_shade, #448a85);
-  background-color: var(--proteo-main_color_shade, #448a85);
+  border: 1px solid var(--yith-wcaf-dashboard--accent-color, var(--proteo-main_color_shade, #448a85));
+  background-color: var(--yith-wcaf-dashboard--accent-color, var(--proteo-main_color_shade, #448a85));
   color: #fff;
   text-align: left;
 }
@@ -994,20 +1077,20 @@
   padding: 0 30px;
 }
 .yith-wcaf-dashboard table.yith-wcaf-table tr td {
-  border-top: 1px solid #ccc;
-  border-bottom: 1px solid #ccc;
+  border-top: 1px solid var(--yith-wcaf-dashboard--border-color, #ccc);
+  border-bottom: 1px solid var(--yith-wcaf-dashboard--border-color, #ccc);
   padding: 20px 25px;
   text-align: left;
 }
 .yith-wcaf-dashboard table.yith-wcaf-table tr td:first-child {
-  border-left: 1px solid #ccc;
-  border-top-left-radius: 4px;
-  border-bottom-left-radius: 4px;
+  border-left: 1px solid var(--yith-wcaf-dashboard--border-color, #ccc);
+  border-top-left-radius: var(--yith-wcaf-border--radius, 4px);
+  border-bottom-left-radius: var(--yith-wcaf-border--radius, 4px);
 }
 .yith-wcaf-dashboard table.yith-wcaf-table tr td:last-child {
-  border-right: 1px solid #ccc;
-  border-top-right-radius: 4px;
-  border-bottom-right-radius: 4px;
+  border-right: 1px solid var(--yith-wcaf-dashboard--border-color, #ccc);
+  border-top-right-radius: var(--yith-wcaf-border--radius, 4px);
+  border-bottom-right-radius: var(--yith-wcaf-border--radius, 4px);
 }
 .yith-wcaf-dashboard table.yith-wcaf-table tr .column-amount {
   text-align: center;
@@ -1054,28 +1137,32 @@
   text-transform: uppercase;
 }
 .yith-wcaf-dashboard table.yith-wcaf-table tr .column-status mark.status-badge.pending, .yith-wcaf-dashboard table.yith-wcaf-table tr .column-status mark.status-badge.not-converted {
-  background-color: #cf8300;
+  background-color: var(--yith-wcaf-status--pending--background-color, #cf8300);
+  color: var(--yith-wcaf-status--pending--color, #ffffff);
 }
-.yith-wcaf-dashboard table.yith-wcaf-table tr .column-status mark.status-badge.enabled {
-  background-color: #afb000;
-}
-.yith-wcaf-dashboard table.yith-wcaf-table tr .column-status mark.status-badge.paid, .yith-wcaf-dashboard table.yith-wcaf-table tr .column-status mark.status-badge.completed, .yith-wcaf-dashboard table.yith-wcaf-table tr .column-status mark.status-badge.converted {
-  background-color: #afb000;
+.yith-wcaf-dashboard table.yith-wcaf-table tr .column-status mark.status-badge.enabled, .yith-wcaf-dashboard table.yith-wcaf-table tr .column-status mark.status-badge.paid, .yith-wcaf-dashboard table.yith-wcaf-table tr .column-status mark.status-badge.completed, .yith-wcaf-dashboard table.yith-wcaf-table tr .column-status mark.status-badge.converted {
+  background-color: var(--yith-wcaf-status--completed--background-color, #afb000);
+  color: var(--yith-wcaf-status--completed--color, #ffffff);
 }
 .yith-wcaf-dashboard table.yith-wcaf-table tr .column-status mark.status-badge.cancelled, .yith-wcaf-dashboard table.yith-wcaf-table tr .column-status mark.status-badge.banned {
-  background-color: #cd1927;
+  background-color: var(--yith-wcaf-status--cancelled--background-color, #cd1927);
+  color: var(--yith-wcaf-status--cancelled--color, #ffffff);
 }
 .yith-wcaf-dashboard table.yith-wcaf-table tr .column-status mark.status-badge.disabled, .yith-wcaf-dashboard table.yith-wcaf-table tr .column-status mark.status-badge.on-hold, .yith-wcaf-dashboard table.yith-wcaf-table tr .column-status mark.status-badge.not-confirmed {
-  background-color: #748c9c;
+  background-color: var(--yith-wcaf-status--rejected--background-color, #748c9c);
+  color: var(--yith-wcaf-status--rejected--color, #ffffff);
 }
 .yith-wcaf-dashboard table.yith-wcaf-table tr .column-status mark.status-badge.pending-payment {
-  background-color: #999d84;
+  background-color: var(--yith-wcaf-status--pending--background-color-payment, #999d84);
+  color: var(--yith-wcaf-status--pending--color-payment, #ffffff);
 }
 .yith-wcaf-dashboard table.yith-wcaf-table tr .column-status mark.status-badge.refunded {
-  background-color: #730000;
+  background-color: var(--yith-wcaf-status--refunded--background-color, #730000);
+  color: var(--yith-wcaf-status--refunded--color, #ffffff);
 }
 .yith-wcaf-dashboard table.yith-wcaf-table tr .column-status mark.status-badge.trash {
-  background-color: #c73878;
+  background-color: var(--yith-wcaf-status--trash--background-color, #c73878);
+  color: var(--yith-wcaf-status--trash--color, #ffffff);
 }
 .yith-wcaf-dashboard table.yith-wcaf-table tr .column-status mark.status-badge.small {
   padding: 0 5px;
@@ -1086,8 +1173,8 @@
  * === 5. LINK GENERATOR ===
  */
 .yith-wcaf-link-generator .link-generator-box {
-  border: 1px solid #ccc;
-  border-radius: 10px;
+  border: 1px solid var(--yith-wcaf-dashboard--border-color, #ccc);
+  border-radius: var(--yith-wcaf-dashboard--border-radius, 10px);
   padding: 10px 30px;
   margin-bottom: 30px;
   display: grid;
@@ -1102,9 +1189,9 @@
 }
 .yith-wcaf-link-generator .link-generator-box.double-column .link-generator {
   background-color: #fafafa;
-  border-left: 1px solid #ccc;
-  border-top-right-radius: 10px;
-  border-bottom-right-radius: 10px;
+  border-left: 1px solid var(--yith-wcaf-dashboard--border-color, #ccc);
+  border-top-right-radius: var(--yith-wcaf-dashboard--border-radius, 10px);
+  border-bottom-right-radius: var(--yith-wcaf-dashboard--border-radius, 10px);
 }
 .yith-wcaf-link-generator .link-generator-box.single-column {
   grid-template-columns: 1fr;
@@ -1120,7 +1207,7 @@
 }
 .yith-wcaf-link-generator .link-generator-box .affiliate-info .bold-text,
 .yith-wcaf-link-generator .link-generator-box .link-generator .bold-text {
-  font-weight: 700;
+  font-weight: var(--yith-wcaf-dashboard-font-weight--bold, 700);
 }
 .yith-wcaf-link-generator .link-generator-box .affiliate-info p .copy-field-wrapper,
 .yith-wcaf-link-generator .link-generator-box .link-generator p .copy-field-wrapper {
@@ -1307,7 +1394,7 @@
 }
 .yith-wcaf-registration-form .login-form,
 .yith-wcaf-registration-form .register-form {
-  border-radius: 10px;
+  border-radius: var(--yith-wcaf-dashboard--border-radius, 10px);
   padding: 40px 80px;
   /**
    * Fields CSS
@@ -1359,11 +1446,11 @@
 }
 .yith-wcaf-registration-form .login-form p.form-row .password-wrapper .toggle-button.click-to-show svg path,
 .yith-wcaf-registration-form .register-form p.form-row .password-wrapper .toggle-button.click-to-show svg path {
-  fill: #A0A0A0;
+  fill: var(--yith-wcaf-text-color--light, #A0A0A0);
 }
 .yith-wcaf-registration-form .login-form p.form-row .password-wrapper .toggle-button.click-to-hide svg path,
 .yith-wcaf-registration-form .register-form p.form-row .password-wrapper .toggle-button.click-to-hide svg path {
-  fill: var(--proteo-main_color_shade, #448a85);
+  fill: var(--yith-wcaf-dashboard--accent-color, var(--proteo-main_color_shade, #448a85));
 }
 .yith-wcaf-registration-form .login-form p.form-row .terms-label,
 .yith-wcaf-registration-form .login-form p.form-row .woocommerce-privacy-policy-text,
@@ -1382,23 +1469,23 @@
 .yith-wcaf-registration-form .login-form p.form-row .error-msg,
 .yith-wcaf-registration-form .register-form p.form-row .error-msg {
   bottom: -25px;
-  color: #f44336;
+  color: var(--yith-wcaf-dashboard--error, #f44336);
   font-size: 0.75em;
   left: 15px;
   position: absolute;
 }
 .yith-wcaf-registration-form .login-form {
-  border: 1px solid #EDEDED;
+  border: 1px solid var(--yith-wcaf-border--color, #EDEDED);
 }
 .yith-wcaf-registration-form .register-form {
-  background-color: #F3F3F3;
+  background-color: var(--yith-wcaf-background-color, #F3F3F3);
 }
 .yith-wcaf-registration-form .become-an-affiliate-form,
 .yith-wcaf-registration-form .already-an-affiliate-wrapper,
 .yith-wcaf-registration-form .pending-request-wrapper,
 .yith-wcaf-registration-form .rejected-request-wrapper {
-  background-color: #F3F3F3;
-  border-radius: 10px;
+  background-color: var(--yith-wcaf-background-color, #F3F3F3);
+  border-radius: var(--yith-wcaf-dashboard--border-radius, 10px);
   margin: 0 auto;
   max-width: 600px;
   padding: 40px 80px;
@@ -1487,7 +1574,45 @@
   .yith-wcaf-link-generator .link-generator-box.double-column .link-generator {
     border-left: none;
   }
+  table.wp-list-table tr .column-rate,
+  table.wp-list-table tr .column-earnings,
+  table.wp-list-table tr .column-balance,
+  table.wp-list-table tr .column-refunds,
+  table.wp-list-table tr .column-paid,
+  table.wp-list-table tr .column-line_item_total,
+  table.wp-list-table tr .column-enabled {
+    text-align: left !important;
+  }
+  table.wp-list-table tr .column-status mark.status-badge {
+    min-width: auto !important;
+    font-size: 9px !important;
+  }
+  table.wp-list-table tr .column-amount {
+    text-align: left !important;
+    padding: auto !important;
+  }
+  #yith_wcaf_panel_commission_details .grid-container {
+    display: block !important;
+  }
+  #yith_wcaf_panel_commission_details .grid-container .commission-status mark {
+    display: block;
+    margin-bottom: 15px;
+  }
+  #yith_wcaf_panel_commission_details .grid-container .commission-details-container {
+    grid-template-columns: auto !important;
+  }
+  #yith_wcaf_panel_dashboard #yith_wcaf_dashboard_root .leaderboard-group {
+    grid-template-columns: 100% !important;
+  }
 }
+#yith_wcaf_panel_settings-affiliates-registration table.affiliate-fields tr .column-required {
+  text-align: left !important;
+}
+
+.auto-fold .yith-plugin-fw__modal--allow-wp-menu .yith-plugin-fw__modal__wrap {
+  z-index: 9999999;
+}
+
 /**
  * === 3. SMALL DESKTOPS ===
  */
@@ -1499,7 +1624,7 @@
     display: none;
   }
   .yith-wcaf-dashboard .yith-wcaf-dashboard-summary .affiliate-stats {
-    column-gap: 30px;
+    grid-gap: 30px;
   }
   .yith-wcaf-dashboard .yith-wcaf-dashboard-summary .affiliate-stats .stat-label,
   .yith-wcaf-dashboard .yith-wcaf-dashboard-summary .affiliate-stats .stat-value {

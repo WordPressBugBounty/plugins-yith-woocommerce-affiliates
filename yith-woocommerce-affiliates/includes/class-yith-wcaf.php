@@ -25,7 +25,7 @@ if ( ! class_exists( 'YITH_WCAF' ) ) {
 		 * @const string
 		 * @since 2.0.0
 		 */
-		const VERSION = '3.10.0';
+		const VERSION = '3.11.0';
 
 		/**
 		 * Plugin version
@@ -186,6 +186,12 @@ if ( ! class_exists( 'YITH_WCAF' ) ) {
 						'errors'               => array(
 							'accept_check'  => _x( 'Please, accept this condition', '[GLOBAL] Form validation error', 'yith-woocommerce-affiliates' ),
 							'compile_field' => _x( 'Please, complete this field', '[GLOBAL] Form validation error', 'yith-woocommerce-affiliates' ),
+							'wrong_url'     => _x( 'Please, enter a valid URL', '[GLOBAL] Form validation error', 'yith-woocommerce-affiliates' ),
+							'wrong_email'   => _x( 'Please, enter a valid email address', '[GLOBAL] Form validation error', 'yith-woocommerce-affiliates' ),
+							'malformed'     => _x( 'Please, enter a valid value', '[GLOBAL] Form validation error', 'yith-woocommerce-affiliates' ),
+							'overflow'      => _x( 'Please, enter a valid amount', '[GLOBAL] Form validation error', 'yith-woocommerce-affiliates' ),
+							'short'         => _x( 'Value is too short', '[GLOBAL] Form validation error', 'yith-woocommerce-affiliates' ),
+							'long'          => _x( 'Value is too long', '[GLOBAL] Form validation error', 'yith-woocommerce-affiliates' ),
 						),
 					),
 					'nonces'              => array(
@@ -193,6 +199,8 @@ if ( ! class_exists( 'YITH_WCAF' ) ) {
 						'set_referrer'     => wp_create_nonce( 'set_referrer' ),
 					),
 					'ajax_url'            => admin_url( 'admin-ajax.php' ),
+					'dashboard_url'       => YITH_WCAF_Dashboard()->get_dashboard_url(),
+					'endpoints'           => YITH_WCAF_Endpoints::get_available_endpoints(),
 					'set_cookie_via_ajax' => 'yes' === get_option( 'yith_wcaf_referral_cookie_ajax_set', 'no' ),
 					'referral_var'        => YITH_WCAF_Session()->get_ref_name(),
 				)
@@ -422,7 +430,6 @@ if ( ! class_exists( 'YITH_WCAF' ) ) {
 
 			return static::$instance;
 		}
-
 	}
 }
 
@@ -432,6 +439,6 @@ if ( ! class_exists( 'YITH_WCAF' ) ) {
  * @return \YITH_WCAF
  * @since 1.0.0
  */
-function YITH_WCAF() { // phpcs:ignore WordPress.NamingConventions.ValidFunctionName.FunctionNameInvalid
+function YITH_WCAF() { // phpcs:ignore WordPress.NamingConventions.ValidFunctionName.FunctionNameInvalid, Universal.Files.SeparateFunctionsFromOO
 	return YITH_WCAF::get_instance();
 }

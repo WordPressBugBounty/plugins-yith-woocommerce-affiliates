@@ -196,7 +196,7 @@ if ( ! class_exists( 'YITH_WCAF_Orders' ) ) {
 						'line_item_id' => $item_id,
 						'line_total'   => $this->get_line_item_total( $order, $item, $rate ),
 						'product_id'   => $product_id,
-						'product_name' => wp_strip_all_tags( $item->get_product()->get_formatted_name() ),
+						'product_name' => wp_strip_all_tags( $item->get_product()->get_name() ),
 						'rate'         => $rate,
 						'amount'       => $commission_amount,
 						'status'       => $commission_status,
@@ -232,13 +232,14 @@ if ( ! class_exists( 'YITH_WCAF_Orders' ) ) {
 						$commission = YITH_WCAF_Commission_Factory::get_commission( $old_id );
 					}
 
-					// if no previous commission is found, generate a new one.
+					// create or update commission with new props.
 					if ( ! $commission ) {
-						$commission = new YITH_WCAF_Commission();
+						$commission = YITH_WCAF_Commission_Factory::create_commission( $commission_args );
+					} else {
+						$commission->set_props( $commission_args );
 					}
 
-					// create or update commission with new props.
-					$commission->set_props( $commission_args );
+					// save commission.
 					$commission->save();
 				}
 			}
@@ -502,6 +503,8 @@ if ( ! class_exists( 'YITH_WCAF_Orders' ) ) {
 				return;
 			}
 
+			$token             = $order->get_meta( '_yith_wcaf_referral' );
+			$token_origin      = $order->get_meta( '_yith_wcaf_token_origin' );
 			$commission_status = $this->map_commission_status( $new_status );
 			$commissions       = YITH_WCAF_Commission_Factory::get_commissions(
 				array(
@@ -509,20 +512,23 @@ if ( ! class_exists( 'YITH_WCAF_Orders' ) ) {
 				)
 			);
 
-			if ( $commissions->is_empty() ) {
-				return;
-			}
+			if ( $commissions->is_empty() && $order->has_status( wc_get_is_paid_statuses() ) && $token ) {
+				// if there is no commission for current order, but a token is registered, create them with correct status.
+				$this->create_commissions( $order_id, $token, $token_origin );
+			} elseif ( ! $commissions->is_empty() ) {
+				// otherwise, if commissions exist, map their status to order status.
+				foreach ( $commissions as $commission ) {
+					// if we're paying commission, please skip any user total change.
+					if ( $commission->is_dead() ) {
+						continue;
+					}
 
-			foreach ( $commissions as $commission ) {
-				// if we're paying commission, please skip any user total change.
-				if ( $commission->is_dead() ) {
-					continue;
+					$commission->set_status( $commission_status );
+					$commission->save();
 				}
-
-				$commission->set_status( $commission_status );
-				$commission->save();
 			}
 
+			// perform correct action for current context.
 			$action = in_array( $commission_status, YITH_WCAF_Commissions::get_assigned_statuses(), true ) ? 'confirmed' : 'unconfirmed';
 
 			/**

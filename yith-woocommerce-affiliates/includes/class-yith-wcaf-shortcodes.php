@@ -55,7 +55,7 @@ if ( ! class_exists( 'YITH_WCAF_Shortcodes' ) ) {
 		 * @since 1.0.0
 		 */
 		public static function init() {
-			add_action( 'init', array( static::class, 'init_shortcodes' ) );
+			self::init_shortcodes();
 		}
 
 		/**
@@ -151,22 +151,37 @@ if ( ! class_exists( 'YITH_WCAF_Shortcodes' ) ) {
 		}
 
 		/**
-		 * Get instance of a specific shortcode
+		 * Checks if a specific shortcode exists for the plugin
 		 *
-		 * @param string $shortcode Shortcode to retrieve.
-		 * @return YITH_WCAF_Abstract_Shortcode Shortcode instance, in found; null otherwise
+		 * @param string $tag  Shortcode to check.
+		 * @return bool Whether shortcode exists or not.
 		 */
-		public static function get_instance( $shortcode ) {
+		public static function exists( $tag ) {
 			if ( ! did_action( 'init' ) ) {
 				_doing_it_wrong( '\YITH_WCAF_Shortcodes::get_instance', '\YITH_WCAF_Shortcodes::get_instance should be called after init', '2.0.0' );
 				return null;
 			}
 
-			if ( ! $shortcode || empty( self::$instances[ $shortcode ] ) ) {
+			return ! empty( self::$instances[ $tag ] );
+		}
+
+		/**
+		 * Get instance of a specific shortcode
+		 *
+		 * @param string $tag Shortcode to retrieve.
+		 * @return YITH_WCAF_Abstract_Shortcode Shortcode instance, in found; null otherwise
+		 */
+		public static function get_instance( $tag ) {
+			if ( ! did_action( 'init' ) ) {
+				_doing_it_wrong( '\YITH_WCAF_Shortcodes::get_instance', '\YITH_WCAF_Shortcodes::get_instance should be called after init', '2.0.0' );
 				return null;
 			}
 
-			return self::$instances[ $shortcode ];
+			if ( ! $tag || empty( self::$instances[ $tag ] ) ) {
+				return null;
+			}
+
+			return self::$instances[ $tag ];
 		}
 	}
 }

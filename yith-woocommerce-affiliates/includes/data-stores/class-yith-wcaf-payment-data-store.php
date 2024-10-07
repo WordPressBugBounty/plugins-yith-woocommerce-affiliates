@@ -22,6 +22,13 @@ if ( ! class_exists( 'YITH_WCAF_Payment_Data_Store' ) ) {
 		use YITH_WCAF_Trait_DB_Object, YITH_WCAF_Trait_DB_Note, YITH_WCAF_Trait_Cacheable;
 
 		/**
+		 * Name of the table used to store reference between payment and commissions
+		 *
+		 * @var string
+		 */
+		protected $payment_commission_table;
+
+		/**
 		 * Constructor method
 		 *
 		 * @throws Exception When validation fails.
@@ -29,13 +36,9 @@ if ( ! class_exists( 'YITH_WCAF_Payment_Data_Store' ) ) {
 		public function __construct() {
 			global $wpdb;
 
-			$this->table                   = $wpdb->prefix . 'yith_wcaf_payments';
-			$this->notes_table             = $wpdb->prefix . 'yith_wcaf_payment_notes';
-			$wpdb->yith_payment_commission = $wpdb->prefix . 'yith_wcaf_payment_commission';
-			$this->affiliates_table        = $wpdb->prefix . 'yith_wcaf_affiliates';
-			$wpdb->yith_payments           = $this->table;
-			$wpdb->yith_payment_notes      = $this->notes_table;
-			$wpdb->yith_affiliates         = $this->affiliates_table;
+			$this->table                    = $wpdb->prefix . 'yith_wcaf_payments';
+			$this->notes_table              = $wpdb->prefix . 'yith_wcaf_payment_notes';
+			$this->payment_commission_table = $wpdb->prefix . 'yith_wcaf_payment_commission';
 
 			$this->notes_external_reference_column = 'payment_id';
 
@@ -150,7 +153,7 @@ if ( ! class_exists( 'YITH_WCAF_Payment_Data_Store' ) ) {
 
 			if ( ! $payment_data ) {
 				// format query to retrieve payment.
-				$query = $wpdb->prepare( "SELECT * FROM {$wpdb->yith_payments} WHERE ID = %d", $id );
+				$query = $wpdb->prepare( "SELECT * FROM {$this->table} WHERE ID = %d", $id );
 
 				// retrieve commission data.
 				$payment_data = $wpdb->get_row( $query ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery
@@ -238,7 +241,7 @@ if ( ! class_exists( 'YITH_WCAF_Payment_Data_Store' ) ) {
 			$this->clear_cache( $payment );
 
 			// delete payment.
-			$res = $wpdb->delete( $wpdb->yith_payments, array( 'ID' => $id ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+			$res = $wpdb->delete( $this->table, array( 'ID' => $id ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 
 			if ( $res ) {
 				/**
@@ -339,8 +342,6 @@ if ( ! class_exists( 'YITH_WCAF_Payment_Data_Store' ) ) {
 		public function query( $args = array() ) {
 			global $wpdb;
 
-			$available_statuses = array_keys( YITH_WCAF_Payments::get_available_statuses() );
-
 			$defaults = array(
 				'ID'                => false,
 				'include'           => array(),
@@ -374,6 +375,9 @@ if ( ! class_exists( 'YITH_WCAF_Payment_Data_Store' ) ) {
 
 			// if no data found in cache, query database.
 			if ( false === $res ) {
+				// affiliates table name.
+				$affiliates_table = WC_Data_Store::load( 'affiliate' )->get_table();
+
 				$query      = "SELECT
 						yp.*,
 						ya.token AS affiliate_token,
@@ -383,159 +387,22 @@ if ( ! class_exists( 'YITH_WCAF_Payment_Data_Store' ) ) {
 						u.ID AS user_id,
 						u.user_login AS user_login,
 						u.user_email AS user_email
-					FROM {$wpdb->yith_payments} AS yp
-					LEFT JOIN {$wpdb->yith_affiliates} AS ya ON ya.ID = yp.affiliate_id
-					LEFT JOIN {$wpdb->users} AS u ON u.ID = ya.user_id
-					WHERE 1 = 1";
+					FROM {$this->table} AS yp
+					LEFT JOIN {$affiliates_table} AS ya ON ya.ID = yp.affiliate_id
+					LEFT JOIN {$wpdb->users} AS u ON u.ID = ya.user_id";
 				$query_args = array();
 
 				if ( $is_counting ) {
 					$query = "SELECT COUNT(*)
-						FROM {$wpdb->yith_payments} AS yp
-						LEFT JOIN {$wpdb->yith_affiliates} AS ya ON ya.ID = yp.affiliate_id
-						LEFT JOIN {$wpdb->users} AS u ON u.ID = ya.user_id
-						WHERE 1 = 1";
+						FROM {$this->table} AS yp
+						LEFT JOIN {$affiliates_table} AS ya ON ya.ID = yp.affiliate_id
+						LEFT JOIN {$wpdb->users} AS u ON u.ID = ya.user_id";
 				}
 
-				if ( ! empty( $args['ID'] ) ) {
-					$query       .= ' AND yp.ID = %d';
-					$query_args[] = $args['ID'];
-				}
-
-				if ( ! empty( $args['include'] ) ) {
-					$args['include'] = (array) $args['include'];
-
-					$query     .= ' AND yp.ID IN (' . trim( str_repeat( '%d, ', count( $args['include'] ) ), ', ' ) . ')';
-					$query_args = array_merge(
-						$query_args,
-						$args['include']
-					);
-				}
-
-				if ( ! empty( $args['exclude'] ) ) {
-					$args['exclude'] = (array) $args['exclude'];
-
-					$query     .= ' AND yp.ID IN (' . trim( str_repeat( '%d, ', count( $args['exclude'] ) ), ', ' ) . ')';
-					$query_args = array_merge(
-						$query_args,
-						$args['exclude']
-					);
-				}
-
-				if ( ! empty( $args['user_id'] ) ) {
-					$query       .= ' AND u.ID = %d';
-					$query_args[] = $args['user_id'];
-				}
-
-				if ( ! empty( $args['affiliate_id'] ) ) {
-					$query       .= ' AND ya.ID = %d';
-					$query_args[] = $args['affiliate_id'];
-				}
-
-				if ( ! empty( $args['commissions'] ) ) {
-					$commissions = array_map( 'intval', (array) $args['commissions'] );
-
-					if ( ! empty( $commissions ) ) {
-						$query     .= ' AND yp.ID IN (
-							SELECT payment_id
-							FROM ' . $wpdb->yith_payment_commission . '
-							WHERE commission_id IN ( ' . trim( str_repeat( '%d, ', count( $commissions ) ), ', ' ) . ' )
-						)';
-						$query_args = array_merge(
-							$query_args,
-							$commissions
-						);
-					}
-				}
-
-				if ( ! empty( $args['user_login'] ) ) {
-					$query       .= ' AND u.user_login LIKE %s';
-					$query_args[] = '%' . $args['user_login'] . '%';
-				}
-
-				if ( ! empty( $args['user_email'] ) ) {
-					$query       .= ' AND u.user_email LIKE %s';
-					$query_args[] = '%' . $args['user_email'] . '%';
-				}
-
-				if ( ! empty( $args['payment_email'] ) ) {
-					$query       .= ' AND yp.payment_email LIKE %s';
-					$query_args[] = '%' . $args['payment_email'] . '%';
-				}
-
-				if ( ! empty( $args['status'] ) ) {
-					if ( ! is_array( $args['status'] ) && in_array( $args['status'], $available_statuses, true ) ) {
-						$query       .= ' AND yp.status = %s';
-						$query_args[] = $args['status'];
-					} elseif ( is_array( $args['status'] ) ) {
-						$filtered_statuses = array_intersect( $args['status'], $available_statuses );
-
-						if ( $filtered_statuses ) {
-							$query     .= ' AND yp.status IN ( ' . trim( str_repeat( '%s, ', count( $filtered_statuses ) ), ', ' ) . ' )';
-							$query_args = array_merge(
-								$query_args,
-								$filtered_statuses
-							);
-						}
-					}
-				}
-
-				if ( ! empty( $args['amount'] ) && is_array( $args['amount'] ) && ( isset( $args['amount']['min'] ) || isset( $args['amount']['max'] ) ) ) {
-					if ( ! empty( $args['amount']['min'] ) ) {
-						$query       .= ' AND yp.amount >= %f';
-						$query_args[] = $args['amount']['min'];
-					}
-
-					if ( ! empty( $args['amount']['max'] ) ) {
-						$query       .= ' AND yp.amount <= %f';
-						$query_args[] = $args['amount']['max'];
-					}
-				}
-
-				if ( ! empty( $args['interval'] ) && is_array( $args['interval'] ) && ( isset( $args['interval']['start_date'] ) || isset( $args['interval']['end_date'] ) ) ) {
-					if ( ! empty( $args['interval']['start_date'] ) ) {
-						$query       .= ' AND yp.created_at >= %s';
-						$query_args[] = $args['interval']['start_date'];
-					}
-
-					if ( ! empty( $args['interval']['end_date'] ) ) {
-						$query       .= ' AND yp.created_at <= %s';
-						$query_args[] = $args['interval']['end_date'];
-					}
-				}
-
-				if ( ! empty( $args['completed_between'] ) && is_array( $args['completed_between'] ) && ( isset( $args['completed_between']['start_date'] ) || isset( $args['completed_between']['end_date'] ) ) ) {
-					if ( ! empty( $args['completed_between']['start_date'] ) ) {
-						$query       .= ' AND yp.completed_at >= %s';
-						$query_args[] = $args['completed_between']['start_date'];
-					}
-
-					if ( ! empty( $args['completed_between']['end_date'] ) ) {
-						$query       .= ' AND yp.completed_at <= %s';
-						$query_args[] = $args['completed_between']['end_date'];
-					}
-				}
-
-				if ( ! empty( $args['transaction_key'] ) ) {
-					$query       .= ' AND yp.transaction_key LIKE %s';
-					$query_args[] = '%' . $args['transaction_key'] . '%';
-				}
-
-				if ( ! empty( $args['s'] ) ) {
-					$query       .= ' AND ( u.user_login LIKE %s OR u.user_email LIKE %s OR yp.payment_email LIKE %s OR yp.transaction_key LIKE %s )';
-					$query_args[] = '%' . $args['s'] . '%';
-					$query_args[] = '%' . $args['s'] . '%';
-					$query_args[] = '%' . $args['s'] . '%';
-					$query_args[] = '%' . $args['s'] . '%';
-				}
-
-				if ( ! empty( $args['orderby'] ) && ! $is_counting ) {
-					$query .= $this->generate_query_orderby_clause( $args['orderby'], $args['order'] );
-				}
-
-				if ( ! empty( $args['limit'] ) && 0 < (int) $args['limit'] && ! $is_counting ) {
-					$query .= sprintf( ' LIMIT %d, %d', ! empty( $args['offset'] ) ? $args['offset'] : 0, $args['limit'] );
-				}
+				// append clauses to the query.
+				$query .= $this->generate_query_where_clause( $args, $query_args );
+				$query .= $this->generate_query_orderby_clause( $args, $query_args );
+				$query .= $this->generate_query_limit_clause( $args, $query_args );
 
 				if ( ! empty( $query_args ) ) {
 					$query = $wpdb->prepare( $query, $query_args ); // phpcs:ignore WordPress.DB
@@ -611,7 +478,7 @@ if ( ! class_exists( 'YITH_WCAF_Payment_Data_Store' ) ) {
 
 				$args = wp_parse_args( $args, $defaults );
 
-				$query      = "SELECT yp.status, COUNT( yp.status ) AS status_count FROM {$wpdb->yith_payments} AS yp WHERE 1 = 1";
+				$query      = "SELECT yp.status, COUNT( yp.status ) AS status_count FROM {$this->table} AS yp WHERE 1 = 1";
 				$query_args = array();
 
 				if ( ! empty( $args['affiliate_id'] ) ) {
@@ -678,7 +545,7 @@ if ( ! class_exists( 'YITH_WCAF_Payment_Data_Store' ) ) {
 				return false;
 			}
 
-			$ids = $wpdb->get_col( $wpdb->prepare( "SELECT commission_id FROM {$wpdb->yith_payment_commission} WHERE payment_id = %d", $payment->get_id() ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+			$ids = $wpdb->get_col( $wpdb->prepare( "SELECT commission_id FROM {$this->payment_commission_table} WHERE payment_id = %d", $payment->get_id() ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 
 			if ( ! $ids ) {
 				return false;
@@ -716,7 +583,7 @@ if ( ! class_exists( 'YITH_WCAF_Payment_Data_Store' ) ) {
 			if ( ! empty( $commissions_to_add ) ) {
 				foreach ( $commissions_to_add as $commission_id ) {
 					$wpdb->insert( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
-						$wpdb->yith_payment_commission,
+						$this->payment_commission_table,
 						array(
 							'commission_id' => $commission_id,
 							'payment_id'    => $payment_id,
@@ -735,7 +602,7 @@ if ( ! class_exists( 'YITH_WCAF_Payment_Data_Store' ) ) {
 			if ( ! empty( $commissions_to_remove ) ) {
 				foreach ( $commissions_to_remove as $commission_id ) {
 					$wpdb->delete( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
-						$wpdb->yith_payment_commission,
+						$this->payment_commission_table,
 						array(
 							'payment_id'    => $payment_id,
 							'commission_id' => $commission_id,
@@ -747,6 +614,152 @@ if ( ! class_exists( 'YITH_WCAF_Payment_Data_Store' ) ) {
 					);
 				}
 			}
+		}
+
+		/**
+		 * Generates where clause for the query, given a set of arguments
+		 *
+		 * @param array $args       Array of query arguments.
+		 * @param array $query_args Array of parameters to build up into the query (reference).
+		 * @return string Where clause.
+		 */
+		protected function generate_query_where_clause( $args = array(), &$query_args = array() ) {
+			$where              = ' WHERE 1 = 1';
+			$available_statuses = array_keys( YITH_WCAF_Payments::get_available_statuses() );
+
+			if ( ! empty( $args['ID'] ) ) {
+				$where       .= ' AND yp.ID = %d';
+				$query_args[] = $args['ID'];
+			}
+
+			if ( ! empty( $args['include'] ) ) {
+				$args['include'] = (array) $args['include'];
+
+				$where     .= ' AND yp.ID IN (' . trim( str_repeat( '%d, ', count( $args['include'] ) ), ', ' ) . ')';
+				$query_args = array_merge(
+					$query_args,
+					$args['include']
+				);
+			}
+
+			if ( ! empty( $args['exclude'] ) ) {
+				$args['exclude'] = (array) $args['exclude'];
+
+				$where     .= ' AND yp.ID IN (' . trim( str_repeat( '%d, ', count( $args['exclude'] ) ), ', ' ) . ')';
+				$query_args = array_merge(
+					$query_args,
+					$args['exclude']
+				);
+			}
+
+			if ( ! empty( $args['user_id'] ) ) {
+				$where       .= ' AND u.ID = %d';
+				$query_args[] = $args['user_id'];
+			}
+
+			if ( ! empty( $args['affiliate_id'] ) ) {
+				$where       .= ' AND ya.ID = %d';
+				$query_args[] = $args['affiliate_id'];
+			}
+
+			if ( ! empty( $args['commissions'] ) ) {
+				$commissions = array_map( 'intval', (array) $args['commissions'] );
+
+				if ( ! empty( $commissions ) ) {
+					$where     .= ' AND yp.ID IN (
+							SELECT payment_id
+							FROM ' . $this->payment_commission_table . '
+							WHERE commission_id IN ( ' . trim( str_repeat( '%d, ', count( $commissions ) ), ', ' ) . ' )
+						)';
+					$query_args = array_merge(
+						$query_args,
+						$commissions
+					);
+				}
+			}
+
+			if ( ! empty( $args['user_login'] ) ) {
+				$where       .= ' AND u.user_login LIKE %s';
+				$query_args[] = '%' . $args['user_login'] . '%';
+			}
+
+			if ( ! empty( $args['user_email'] ) ) {
+				$where       .= ' AND u.user_email LIKE %s';
+				$query_args[] = '%' . $args['user_email'] . '%';
+			}
+
+			if ( ! empty( $args['payment_email'] ) ) {
+				$where       .= ' AND yp.payment_email LIKE %s';
+				$query_args[] = '%' . $args['payment_email'] . '%';
+			}
+
+			if ( ! empty( $args['status'] ) ) {
+				if ( ! is_array( $args['status'] ) && in_array( $args['status'], $available_statuses, true ) ) {
+					$where       .= ' AND yp.status = %s';
+					$query_args[] = $args['status'];
+				} elseif ( is_array( $args['status'] ) ) {
+					$filtered_statuses = array_intersect( $args['status'], $available_statuses );
+
+					if ( $filtered_statuses ) {
+						$where     .= ' AND yp.status IN ( ' . trim( str_repeat( '%s, ', count( $filtered_statuses ) ), ', ' ) . ' )';
+						$query_args = array_merge(
+							$query_args,
+							$filtered_statuses
+						);
+					}
+				}
+			}
+
+			if ( ! empty( $args['amount'] ) && is_array( $args['amount'] ) && ( isset( $args['amount']['min'] ) || isset( $args['amount']['max'] ) ) ) {
+				if ( ! empty( $args['amount']['min'] ) ) {
+					$where       .= ' AND yp.amount >= %f';
+					$query_args[] = $args['amount']['min'];
+				}
+
+				if ( ! empty( $args['amount']['max'] ) ) {
+					$where       .= ' AND yp.amount <= %f';
+					$query_args[] = $args['amount']['max'];
+				}
+			}
+
+			if ( ! empty( $args['interval'] ) && is_array( $args['interval'] ) && ( isset( $args['interval']['start_date'] ) || isset( $args['interval']['end_date'] ) ) ) {
+				if ( ! empty( $args['interval']['start_date'] ) ) {
+					$where       .= ' AND yp.created_at >= %s';
+					$query_args[] = $args['interval']['start_date'];
+				}
+
+				if ( ! empty( $args['interval']['end_date'] ) ) {
+					$where       .= ' AND yp.created_at <= %s';
+					$query_args[] = $args['interval']['end_date'];
+				}
+			}
+
+			if ( ! empty( $args['completed_between'] ) && is_array( $args['completed_between'] ) && ( isset( $args['completed_between']['start_date'] ) || isset( $args['completed_between']['end_date'] ) ) ) {
+				if ( ! empty( $args['completed_between']['start_date'] ) ) {
+					$where       .= ' AND yp.completed_at >= %s';
+					$query_args[] = $args['completed_between']['start_date'];
+				}
+
+				if ( ! empty( $args['completed_between']['end_date'] ) ) {
+					$where       .= ' AND yp.completed_at <= %s';
+					$query_args[] = $args['completed_between']['end_date'];
+				}
+			}
+
+			if ( ! empty( $args['transaction_key'] ) ) {
+				$where       .= ' AND yp.transaction_key LIKE %s';
+				$query_args[] = '%' . $args['transaction_key'] . '%';
+			}
+
+			if ( ! empty( $args['s'] ) ) {
+				$where       .= ' AND ( u.user_login LIKE %s OR u.user_email LIKE %s OR yp.payment_email LIKE %s OR yp.transaction_key LIKE %s )';
+				$query_args[] = '%' . $args['s'] . '%';
+				$query_args[] = '%' . $args['s'] . '%';
+				$query_args[] = '%' . $args['s'] . '%';
+				$query_args[] = '%' . $args['s'] . '%';
+			}
+
+			return $where;
 		}
 
 		/* === UTILITIES === */
@@ -761,7 +774,7 @@ if ( ! class_exists( 'YITH_WCAF_Payment_Data_Store' ) ) {
 
 			$charset_collate = $wpdb->get_charset_collate();
 
-			return "CREATE TABLE $wpdb->yith_payments (
+			return "CREATE TABLE $this->table (
                     ID bigint(20) NOT NULL AUTO_INCREMENT,
                     affiliate_id bigint(20) NOT NULL,
                     payment_email varchar(100) NOT NULL DEFAULT '',
@@ -775,7 +788,7 @@ if ( ! class_exists( 'YITH_WCAF_Payment_Data_Store' ) ) {
                     PRIMARY KEY (ID),
                     KEY external_affiliate (affiliate_id)
 				) $charset_collate;
-				CREATE TABLE $wpdb->yith_payment_commission (
+				CREATE TABLE $this->payment_commission_table (
                     ID bigint(20) NOT NULL AUTO_INCREMENT,
                     payment_id bigint(20) NOT NULL,
                     commission_id bigint(20) NOT NULL,
@@ -783,7 +796,7 @@ if ( ! class_exists( 'YITH_WCAF_Payment_Data_Store' ) ) {
                     KEY external_payment (payment_id),
                     KEY external_commission (commission_id)
 				) $charset_collate;
-				CREATE TABLE $wpdb->yith_payment_notes (
+				CREATE TABLE $this->notes_table (
                     ID bigint(20) NOT NULL AUTO_INCREMENT,
                     payment_id bigint(20) NOT NULL,
                     note_content text NOT NULL,

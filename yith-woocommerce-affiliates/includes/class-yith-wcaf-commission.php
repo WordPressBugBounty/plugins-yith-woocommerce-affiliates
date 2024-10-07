@@ -65,35 +65,42 @@ if ( ! class_exists( 'YITH_WCAF_Commission' ) ) {
 		protected $notes = array();
 
 		/**
+		 * Default object properties
+		 *
+		 * @var array
+		 */
+		protected $data = array(
+			'order_id'     => 0,
+			'line_item_id' => 0,
+			'line_total'   => 0,
+			'product_id'   => 0,
+			'product_name' => '',
+			'affiliate_id' => 0,
+			'rate'         => 0,
+			'amount'       => 0,
+			'refunds'      => 0,
+			'status'       => 'pending',
+			'created_at'   => '',
+			'last_edit'    => '',
+		);
+
+		/**
 		 * Constructor
 		 *
-		 * @param int|\YITH_WCAF_Commission $commission Commission identifier.
+		 * @param int|array|\YITH_WCAF_Commission $commission Commission identifier, or commission props.
 		 *
 		 * @throws Exception When not able to load Data Store class.
 		 */
 		public function __construct( $commission = 0 ) {
-			// set default values.
-			$this->data = array(
-				'order_id'     => 0,
-				'line_item_id' => 0,
-				'line_total'   => 0,
-				'product_id'   => 0,
-				'product_name' => '',
-				'affiliate_id' => 0,
-				'rate'         => 0,
-				'amount'       => 0,
-				'refunds'      => 0,
-				'status'       => 'pending',
-				'created_at'   => '',
-				'last_edit'    => '',
-			);
-
 			parent::__construct();
 
 			if ( is_numeric( $commission ) && $commission > 0 ) {
 				$this->set_id( $commission );
 			} elseif ( $commission instanceof self ) {
 				$this->set_id( $commission->get_id() );
+			} elseif ( is_array( $commission ) && isset( $commission['id'] ) ) {
+				$this->set_id( $commission['id'] );
+				unset( $commission['id'] );
 			} else {
 				$this->set_object_read( true );
 			}
@@ -103,6 +110,8 @@ if ( ! class_exists( 'YITH_WCAF_Commission' ) ) {
 			if ( $this->get_id() > 0 ) {
 				$this->data_store->read( $this );
 			}
+
+			is_array( $commission ) && $this->set_props( $commission );
 		}
 
 		/* === GETTERS === */
@@ -136,6 +145,22 @@ if ( ! class_exists( 'YITH_WCAF_Commission' ) ) {
 			}
 
 			return $this->order;
+		}
+
+		/**
+		 * Returns order edit url
+		 *
+		 * @param string $context Context of the operation.
+		 * @return string Order edit url
+		 */
+		public function get_order_edit_url( $context = 'view' ) {
+			$order = $this->get_order( $context );
+
+			if ( ! $order ) {
+				return '';
+			}
+
+			return $order->get_edit_order_url();
 		}
 
 		/**
@@ -204,17 +229,11 @@ if ( ! class_exists( 'YITH_WCAF_Commission' ) ) {
 		 * @return string HTML for the formatted line item total.
 		 */
 		public function get_formatted_line_total( $context = 'view', $args = array() ) {
-			$order = $this->get_order( $context );
-
-			if ( ! $order ) {
-				return '';
-			}
-
 			return wc_price(
 				$this->get_line_total( $context ),
 				array_merge(
 					array(
-						'currency' => $order->get_currency(),
+						'currency' => $this->get_currency(),
 					),
 					$args
 				)
@@ -260,6 +279,38 @@ if ( ! class_exists( 'YITH_WCAF_Commission' ) ) {
 			}
 
 			return $this->product;
+		}
+
+		/**
+		 * Get product permalink for current commission
+		 *
+		 * @param string $context Context of the operation.
+		 * @return string Product permalink.
+		 */
+		public function get_product_url( $context = 'view' ) {
+			$product_id = $this->get_product_id( $context );
+
+			if ( ! $product_id ) {
+				return '';
+			}
+
+			return get_permalink( $product_id );
+		}
+
+		/**
+		 * Get product edit url for current commission
+		 *
+		 * @param string $context Context of the operation.
+		 * @return string Product edit url.
+		 */
+		public function get_product_edit_url( $context = 'view' ) {
+			$product_id = $this->get_product_id( $context );
+
+			if ( ! $product_id ) {
+				return '';
+			}
+
+			return get_edit_post_link( $product_id );
 		}
 
 		/**
@@ -729,7 +780,7 @@ if ( ! class_exists( 'YITH_WCAF_Commission' ) ) {
 
 			$return = array_merge(
 				array(
-					'ID' => $this->get_id(),
+					'id' => $this->get_id(),
 				),
 				$data,
 				array(

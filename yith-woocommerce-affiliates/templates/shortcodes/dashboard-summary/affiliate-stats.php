@@ -10,14 +10,24 @@
 /**
  * Template variables:
  *
- * @var $affiliate                YITH_WCAF_Affiliate
- * @var $show_commissions_summary bool
- * @var $number_of_commissions    int
- * @var $show_clicks_summary      bool
- * @var $number_of_clicks         int
- * @var $show_referral_stats      bool
- * @var $clicks                   YITH_WCAF_Clicks_Collection
- * @var $commissions              YITH_WCAF_Commissions_Collection
+ * @var $affiliate                   YITH_WCAF_Affiliate
+ * @var $show_commissions_summary    bool
+ * @var $number_of_commissions       int
+ * @var $show_clicks_summary         bool
+ * @var $number_of_clicks            int
+ * @var $show_active_balance         bool
+ * @var $clicks                      YITH_WCAF_Clicks_Collection
+ * @var $commissions                 YITH_WCAF_Commissions_Collection
+ * @var $affiliate_total_balance     float
+ * @var $affiliate_available_balance float
+ * @var $affiliate_earnings          float
+ * @var $affiliate_paid              float
+ * @var $affiliate_refunds           float
+ * @var $affiliate_rate              float
+ * @var $affiliate_conversion        int
+ * @var $affiliate_visits            int
+ * @var $affiliate_visits_today      int
+ * @var $balance_description         string
  */
 
 if ( ! defined( 'YITH_WCAF' ) ) {
@@ -33,38 +43,52 @@ if ( ! $affiliate || ! $affiliate instanceof YITH_WCAF_Affiliate ) {
 <!--AFFILIATE STATS-->
 
 <div class="affiliate-stats">
-	<div class="stat-box">
+	<div class="stat-box <?php echo $show_active_balance ? 'with-active-balance' : 'without-active-balance'; ?>">
 		<div class="stat-item large">
-				<span class="stat-label">
-					<?php echo esc_html_x( 'Total earnings', '[FRONTEND] Affiliate dashboard', 'yith-woocommerce-affiliates' ); ?>
-				</span>
+			<span class="stat-label">
+				<?php echo esc_html_x( 'Current balance', '[FRONTEND] Affiliate dashboard', 'yith-woocommerce-affiliates' ); ?>
+				<?php if ( $show_active_balance ) : ?>
+					<span class="desc-tip" data-tip="<?php echo esc_attr( $balance_description ); ?>"></span>
+				<?php endif; ?>
+			</span>
 			<span class="stat-value">
-					<?php echo wp_kses_post( wc_price( $affiliate->get_earnings() ) ); ?>
+				<?php echo wp_kses_post( wc_price( $affiliate_total_balance ) ); ?>
+			</span>
+			<?php if ( $show_active_balance ) : ?>
+				<span class="stat-item highlight affiliate-active-balance">
+					<span class="stat-label">
+						<?php echo esc_html_x( 'Active balance', '[FRONTEND] Affiliate dashboard', 'yith-woocommerce-affiliates' ); ?>
+					</span>
+					<span class="stat-value">
+						<?php echo wp_kses_post( wc_price( $affiliate_available_balance ) ); ?>
+					</span>
+					<?php do_action( 'yith_wcaf_after_affiliate_active_balance' ); ?>
 				</span>
+			<?php endif; ?>
 		</div>
 		<div class="stat-item">
-				<span class="stat-label">
-					<?php echo esc_html_x( 'Total paid', '[FRONTEND] Affiliate dashboard', 'yith-woocommerce-affiliates' ); ?>
-				</span>
+			<span class="stat-label">
+				<?php echo esc_html_x( 'Total earnings', '[FRONTEND] Affiliate dashboard', 'yith-woocommerce-affiliates' ); ?>
+			</span>
 			<span class="stat-value">
-					<?php echo wp_kses_post( wc_price( $affiliate->get_paid() ) ); ?>
-				</span>
+				<?php echo wp_kses_post( wc_price( $affiliate_earnings ) ); ?>
+			</span>
 		</div>
 		<div class="stat-item">
-				<span class="stat-label">
-					<?php echo esc_html_x( 'Total refunded', '[FRONTEND] Affiliate dashboard', 'yith-woocommerce-affiliates' ); ?>
-				</span>
+			<span class="stat-label">
+				<?php echo esc_html_x( 'Total paid', '[FRONTEND] Affiliate dashboard', 'yith-woocommerce-affiliates' ); ?>
+			</span>
 			<span class="stat-value">
-					<?php echo wp_kses_post( wc_price( $affiliate->get_refunds() ) ); ?>
-				</span>
+				<?php echo wp_kses_post( wc_price( $affiliate_paid ) ); ?>
+			</span>
 		</div>
 		<div class="stat-item">
-				<span class="stat-label">
-					<?php echo esc_html_x( 'Balance', '[FRONTEND] Affiliate dashboard', 'yith-woocommerce-affiliates' ); ?>
-				</span>
+			<span class="stat-label">
+				<?php echo esc_html_x( 'Total refunded', '[FRONTEND] Affiliate dashboard', 'yith-woocommerce-affiliates' ); ?>
+			</span>
 			<span class="stat-value">
-					<?php echo wp_kses_post( wc_price( $affiliate->get_balance() ) ); ?>
-				</span>
+				<?php echo wp_kses_post( wc_price( $affiliate_refunds ) ); ?>
+			</span>
 		</div>
 	</div>
 
@@ -74,7 +98,7 @@ if ( ! $affiliate || ! $affiliate instanceof YITH_WCAF_Affiliate ) {
 					<?php echo esc_html_x( 'Commission rate', '[FRONTEND] Affiliate dashboard', 'yith-woocommerce-affiliates' ); ?>
 				</span>
 			<span class="stat-value">
-					<?php echo esc_html( yith_wcaf_get_formatted_rate( $affiliate ) ); ?>
+					<?php echo esc_html( $affiliate_rate ); ?>
 				</span>
 		</div>
 		<div class="stat-item large">
@@ -82,7 +106,7 @@ if ( ! $affiliate || ! $affiliate instanceof YITH_WCAF_Affiliate ) {
 					<?php echo esc_html_x( 'Conversion rate', '[FRONTEND] Affiliate dashboard', 'yith-woocommerce-affiliates' ); ?>
 				</span>
 			<span class="stat-value">
-					<?php echo esc_html( yith_wcaf_rate_format( $affiliate->get_conversion_rate() ) ); ?>
+					<?php echo esc_html( $affiliate_conversion ); ?>
 				</span>
 		</div>
 	</div>
@@ -94,7 +118,7 @@ if ( ! $affiliate || ! $affiliate instanceof YITH_WCAF_Affiliate ) {
 						<?php echo esc_html_x( 'Visits', '[FRONTEND] Affiliate dashboard', 'yith-woocommerce-affiliates' ); ?>
 					</span>
 				<span class="stat-value">
-						<?php echo esc_html( yith_wcaf_number_format( $affiliate->get_clicks_count() ) ); ?>
+						<?php echo esc_html( $affiliate_visits ); ?>
 					</span>
 			</div>
 			<div class="stat-item large">
@@ -102,7 +126,7 @@ if ( ! $affiliate || ! $affiliate instanceof YITH_WCAF_Affiliate ) {
 						<?php echo esc_html_x( 'Visits today', '[FRONTEND] Affiliate dashboard', 'yith-woocommerce-affiliates' ); ?>
 					</span>
 				<span class="stat-value">
-						<?php echo esc_html( yith_wcaf_number_format( $affiliate->count_clicks( array( 'interval' => array( 'start_date' => gmdate( 'Y-m-d 00:00:00' ) ) ) ) ) ); ?>
+						<?php echo esc_html( $affiliate_visits_today ); ?>
 					</span>
 			</div>
 		</div>

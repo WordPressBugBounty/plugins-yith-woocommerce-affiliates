@@ -665,6 +665,13 @@ if ( ! function_exists( 'yith_wcaf_parse_settings' ) ) {
 						// translators: 1. Label of the required field missing.
 						throw new Exception( sprintf( _x( 'Please, choose a valid option for %s', '[GLOBAL] Error message thrown when settings validation fails', 'yith-woocommerce-affiliates' ), $label ) );
 					}
+				} elseif ( 'multicheck' === $type && ! empty( $options ) ) {
+					$value = array_intersect( wc_clean( (array) $value ), array_keys( $options ) );
+
+					if ( ! $value && ! $sanitize_only  ) {
+						// translators: 1. Label of the required field missing.
+						throw new Exception( sprintf( _x( 'Please, choose a valid option for %s', '[GLOBAL] Error message thrown when settings validation fails', 'yith-woocommerce-affiliates' ), $label ) );
+					}
 				} elseif ( 'email' === $type && $value ) {
 					$value = filter_var( $value, FILTER_VALIDATE_EMAIL );
 
@@ -689,7 +696,7 @@ if ( ! function_exists( 'yith_wcaf_parse_settings' ) ) {
 					$value = false;
 				}
 
-				if ( isset( $setting['validation'] ) ) {
+				if ( $value && isset( $setting['validation'] ) ) {
 					switch ( $setting['validation'] ) {
 						case 'email':
 							$value = sanitize_email( $value );

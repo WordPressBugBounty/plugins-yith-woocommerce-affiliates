@@ -163,10 +163,10 @@ if ( ! class_exists( 'YITH_WCAF_Endpoints' ) ) {
 						array(
 							'commissions' => _x( 'Commissions', '[GLOBAL] Endpoint title', 'yith-woocommerce-affiliates' ),
 						),
-						function_exists( 'YITH_WCAF_Clicks' ) && YITH_WCAF_Clicks()->are_hits_registered() ? array(
+						class_exists( 'YITH_WCAF_Clicks' ) && YITH_WCAF_Clicks::get_instance()->are_hits_registered() ? array(
 							'clicks' => _x( 'Visits', '[GLOBAL] Endpoint title', 'yith-woocommerce-affiliates' ),
 						) : array(),
-						function_exists( 'YITH_WCAF_Coupons' ) && YITH_WCAF_Coupons()->are_coupons_enabled() ? array(
+						class_exists( 'YITH_WCAF_Coupons' ) && YITH_WCAF_Coupons::get_instance()->are_coupons_enabled() ? array(
 							'coupons' => _x( 'Coupons', '[GLOBAL] Endpoint title', 'yith-woocommerce-affiliates' ),
 						) : array(),
 						array(

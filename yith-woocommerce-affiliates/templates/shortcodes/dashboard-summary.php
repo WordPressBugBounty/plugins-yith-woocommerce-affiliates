@@ -27,67 +27,63 @@ if ( ! defined( 'YITH_WCAF' ) ) {
 } // Exit if accessed directly
 ?>
 
-<div class="yith-wcaf-dashboard-summary">
+<?php
+if ( function_exists( 'wc_print_notices' ) ) {
+	wc_print_notices();
+}
+?>
 
-	<?php
-	if ( function_exists( 'wc_print_notices' ) ) {
-		wc_print_notices();
-	}
-	?>
+<?php
+/**
+ * DO_ACTION: yith_wcaf_before_dashboard_summary
+ *
+ * Allows to render some content before the summary in the Affiliate Dashboard.
+ *
+ * @param array $atts Array with section attributes.
+ */
+do_action( 'yith_wcaf_before_dashboard_summary', $atts );
+?>
+<?php
+/**
+ * DO_ACTION: yith_wcaf_before_dashboard_section
+ *
+ * Allows to render some content before the section in the Affiliate Dashboard.
+ *
+ * @param string $section Section.
+ * @param array  $atts    Array with section attributes.
+ */
+do_action( 'yith_wcaf_before_dashboard_section', 'summary', $atts );
+?>
 
-	<?php
-	/**
-	 * DO_ACTION: yith_wcaf_before_dashboard_summary
-	 *
-	 * Allows to render some content before the summary in the Affiliate Dashboard.
-	 *
-	 * @param array $atts Array with section attributes.
-	 */
-	do_action( 'yith_wcaf_before_dashboard_summary', $atts );
-	?>
-	<?php
-	/**
-	 * DO_ACTION: yith_wcaf_before_dashboard_section
-	 *
-	 * Allows to render some content before the section in the Affiliate Dashboard.
-	 *
-	 * @param string $section Section.
-	 * @param array  $atts    Array with section attributes.
-	 */
-	do_action( 'yith_wcaf_before_dashboard_section', 'summary', $atts );
-	?>
+<?php
+/**
+ * DO_ACTION: yith_wcaf_dashboard_summary
+ *
+ * Allows to output summary content in the Affiliate Dashboard.
+ *
+ * @param array $atts Array with section attributes.
+ */
+do_action( 'yith_wcaf_dashboard_summary', $atts );
+?>
 
-	<?php
-	/**
-	 * DO_ACTION: yith_wcaf_dashboard_summary
-	 *
-	 * Allows to output summary content in the Affiliate Dashboard.
-	 *
-	 * @param array $atts Array with section attributes.
-	 */
-	do_action( 'yith_wcaf_dashboard_summary', $atts );
-	?>
-
-	<?php
-	/**
-	 * DO_ACTION: yith_wcaf_after_dashboard_section
-	 *
-	 * Allows to render some content after the section in the Affiliate Dashboard.
-	 *
-	 * @param string $section Section.
-	 * @param array  $atts    Array with section attributes.
-	 */
-	do_action( 'yith_wcaf_after_dashboard_section', 'summary', $atts );
-	?>
-	<?php
-	/**
-	 * DO_ACTION: yith_wcaf_after_dashboard_summary
-	 *
-	 * Allows to render some content after the summary in the Affiliate Dashboard.
-	 *
-	 * @param array $atts Array with section attributes.
-	 */
-	do_action( 'yith_wcaf_after_dashboard_summary', $atts );
-	?>
-
-</div>
+<?php
+/**
+ * DO_ACTION: yith_wcaf_after_dashboard_section
+ *
+ * Allows to render some content after the section in the Affiliate Dashboard.
+ *
+ * @param string $section Section.
+ * @param array  $atts    Array with section attributes.
+ */
+do_action( 'yith_wcaf_after_dashboard_section', 'summary', $atts );
+?>
+<?php
+/**
+ * DO_ACTION: yith_wcaf_after_dashboard_summary
+ *
+ * Allows to render some content after the summary in the Affiliate Dashboard.
+ *
+ * @param array $atts Array with section attributes.
+ */
+do_action( 'yith_wcaf_after_dashboard_summary', $atts );
+?>

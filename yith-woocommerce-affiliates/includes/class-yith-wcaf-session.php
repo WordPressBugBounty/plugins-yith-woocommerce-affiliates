@@ -348,7 +348,7 @@ if ( ! class_exists( 'YITH_WCAF_Session' ) ) {
 			 *
 			 * @param bool $set_referral_cookie Whether to set referral cookie or not.
 			 */
-			return ! $this->has_cookie() || $this->token && $this->token !== $this->get_cookie() && apply_filters( 'yith_wcaf_set_ref_cookie', true );
+			return ! $this->has_cookie() && apply_filters( 'yith_wcaf_set_ref_cookie', true ) || $this->token && $this->token !== $this->get_cookie() && apply_filters( 'yith_wcaf_set_ref_cookie', true );
 		}
 
 		/**

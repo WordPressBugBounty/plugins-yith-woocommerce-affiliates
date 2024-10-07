@@ -20,7 +20,7 @@ if ( ! defined( 'YITH_WCAF' ) ) {
 ?>
 
 <?php
-$section = $section ?? 'summary';
+$section = $section ? $section : 'summary';
 $atts    = $atts ?? array();
 ?>
 

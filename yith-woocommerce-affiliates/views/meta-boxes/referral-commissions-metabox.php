@@ -21,7 +21,6 @@ if ( ! defined( 'YITH_WCAF' ) ) {
 } // Exit if accessed directly
 
 if ( ! empty( $referral ) ) :
-	$total = $commissions_table->has_items() ? $commissions_table->items->get_total_amount() : 0;
 	?>
 	<div class="referral-user">
 		<div class="referral-avatar">
@@ -34,15 +33,34 @@ if ( ! empty( $referral ) ) :
 			</a>
 		</div>
 	</div>
+<?php endif; ?>
 
-	<?php if ( $commissions_table->has_items() ) : ?>
+<?php if ( $commissions_table->has_items() ) : ?>
+	<?php
+		$order_total = apply_filters( 'yith_wcaf_commissions_metabox_order_total', $order->get_total(), $order );
+		$total       = apply_filters( 'yith_wcaf_commissions_metabox_commissions_total', $commissions_table->items->get_total_amount(), $order );
+		$net_total   = $order_total - $total;
+	?>
 	<div class="referral-commissions">
 		<?php $commissions_table->display(); ?>
 		<table class="commissions-totals">
 			<tfoot class="totals">
 			<tr>
 				<td class="label" colspan="3"><?php echo esc_html_x( 'Order Total:', '[ADMIN] Order commissions metabox', 'yith-woocommerce-affiliates' ); ?></td>
-				<td class="total"><?php echo wp_kses_post( $order->get_formatted_order_total() ); ?></td>
+				<td class="total">
+					<?php
+					/**
+					 * APPLY_FILTERS: yith_wcaf_commissions_metabox_order_total_html
+					 *
+					 * Filters the order total inside the metabox in the edit order page.
+					 *
+					 * @param string   $formatted_total Order total formatted.
+					 * @param float    $order_total     Order total.
+					 * @param WC_Order $order           Order object.
+					 */
+					echo wp_kses_post( apply_filters( 'yith_wcaf_commissions_metabox_order_total_formatted', wc_price( $order_total ), $order_total, $order ) );
+					?>
+				</td>
 			</tr>
 			<tr>
 				<td class="label" colspan="3">
@@ -54,11 +72,37 @@ if ( ! empty( $referral ) ) :
 					);
 					?>
 				</td>
-				<td class="total"><?php echo wp_kses_post( wc_price( $total ) ); ?></td>
+				<td class="total">
+					<?php
+					/**
+					 * APPLY_FILTERS: yith_wcaf_commissions_metabox_commissions_total_formatted
+					 *
+					 * Filters the commissions total inside the metabox in the edit order page.
+					 *
+					 * @param string   $formatted_total Commissions total formatted.
+					 * @param double   $total           Commissions total.
+					 * @param WC_Order $order           Order object.
+					 */
+					echo wp_kses_post( apply_filters( 'yith_wcaf_commissions_metabox_commissions_total_formatted', wc_price( $total ), $total, $order ) );
+					?>
+				</td>
 			</tr>
 			<tr>
 				<td class="label" colspan="3"><?php echo esc_html_x( 'Store earnings:', '[ADMIN] Order commissions metabox', 'yith-woocommerce-affiliates' ); ?></td>
-				<td class="total"><?php echo wp_kses_post( wc_price( $order->get_total() - $total ) ); ?></td>
+				<td class="total">
+					<?php
+					/**
+					 * APPLY_FILTERS: yith_wcaf_commissions_metabox_net_total_formatted
+					 *
+					 * Filters the net revenue form the order inside the commissions metabox in the edit order page.
+					 *
+					 * @param string   $formatted_total Commissions total formatted.
+					 * @param double   $net_total       Commissions total.
+					 * @param WC_Order $order           Order object.
+					 */
+					echo wp_kses_post( apply_filters( 'yith_wcaf_commissions_metabox_net_total_formatted', wc_price( $net_total ), $net_total, $order ) );
+					?>
+				</td>
 			</tr>
 
 			<?php
@@ -74,5 +118,5 @@ if ( ! empty( $referral ) ) :
 			</tfoot>
 		</table>
 	</div>
-	<?php endif; ?>
-<?php endif; ?>
+	<?php
+endif;

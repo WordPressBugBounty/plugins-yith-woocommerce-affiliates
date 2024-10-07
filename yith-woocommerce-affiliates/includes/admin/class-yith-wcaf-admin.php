@@ -254,6 +254,19 @@ if ( ! class_exists( 'YITH_WCAF_Admin' ) ) {
 		}
 
 		/**
+		 * Returns panel object
+		 *
+		 * @return YIT_Plugin_Panel_WooCommerce
+		 */
+		public function get_panel() {
+			if ( is_null( $this->panel ) ) {
+				wc_doing_it_wrong( __FUNCTION__, 'This function should not be called before panel is registered.', '2.0' );
+			}
+
+			return $this->panel;
+		}
+
+		/**
 		 * Return true if current user can manage admin panel
 		 *
 		 * @return bool Whether current user can manage panel.

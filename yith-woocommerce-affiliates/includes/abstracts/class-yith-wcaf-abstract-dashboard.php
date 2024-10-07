@@ -55,7 +55,7 @@ if ( ! class_exists( 'YITH_WCAF_Abstract_Dashboard' ) ) {
 
 			// dashboard sections.
 			add_action( 'yith_wcaf_social_share_template', array( self::class, 'output_section_share' ), 10, 1 );
-			add_action( 'yith_wcaf_after_dashboard_payments_table_options', array( self::class, 'output_withdraw_modal_opener' ) );
+			add_action( 'yith_wcaf_after_affiliate_active_balance', array( self::class, 'output_withdraw_modal_opener' ) );
 			add_action( 'yith_wcaf_before_dashboard_section', array( self::class, 'output_payment_notice' ), 10, 2 );
 			add_action( 'yith_wcaf_after_dashboard_section', array( self::class, 'output_withdraw_modal' ), 10, 2 );
 
@@ -232,7 +232,7 @@ if ( ! class_exists( 'YITH_WCAF_Abstract_Dashboard' ) ) {
 			if ( 'generate-link' === $section ) {
 				$section_shortcode = YITH_WCAF_Shortcodes::get_instance( 'yith_wcaf_link_generator' );
 				$return            = $section_shortcode ? $section_shortcode->render( $atts ) : '';
-			} elseif ( $section && array_key_exists( $section, $endpoints ) ) {
+			} elseif ( $section && array_key_exists( $section, $endpoints ) && YITH_WCAF_Shortcodes::exists( "yith_wcaf_show_{$section}" ) ) {
 				$section_shortcode = YITH_WCAF_Shortcodes::get_instance( "yith_wcaf_show_{$section}" );
 				$return            = $section_shortcode ? $section_shortcode->render_section( $atts ) : '';
 			} else {
@@ -245,7 +245,7 @@ if ( ! class_exists( 'YITH_WCAF_Abstract_Dashboard' ) ) {
 				 * @param array  $query_vars      Query vars.
 				 * @param array  $atts            Array of attributes.
 				 */
-				$return = apply_filters( 'yith_wcaf_custom_dashboard_sections', '', $wp->query_vars, $atts );
+				$return = apply_filters( 'yith_wcaf_custom_dashboard_sections', '', $wp->query_vars, $atts, $section );
 
 				if ( ! $return ) {
 					$section_shortcode = YITH_WCAF_Shortcodes::get_instance( 'yith_wcaf_affiliate_dashboard' );
@@ -264,7 +264,7 @@ if ( ! class_exists( 'YITH_WCAF_Abstract_Dashboard' ) ) {
 		 */
 		public static function output_withdraw_modal( $section = '', $atts = array() ) {
 			// exit if on wrong section.
-			if ( 'payments' !== $section ) {
+			if ( 'summary' !== $section ) {
 				return;
 			}
 
@@ -273,15 +273,45 @@ if ( ! class_exists( 'YITH_WCAF_Abstract_Dashboard' ) ) {
 				return;
 			}
 
-			$affiliate = YITH_WCAF_Affiliate_Factory::get_current_affiliate();
+			$affiliate                = YITH_WCAF_Affiliate_Factory::get_current_affiliate();
+			$max_withdraw             = round( $affiliate->get_balance(), 2 );
+			$min_withdraw             = round( YITH_WCAF_Withdraws()->get_minimum_withdraw(), 2 );
+			$payment_commission_age   = (int) get_option( 'yith_wcaf_payment_commission_age', 15 );
+			$pay_only_old_commissions = yith_plugin_fw_is_true( get_option( 'yith_wcaf_payment_pay_only_old_commissions', 'no' ) );
+			$modal_notes              = array();
+
+			if ( 0 < $min_withdraw ) {
+				// translators: 1. Minimum amount for the withdraw.
+				$modal_notes['min-withdraw'] = sprintf( _x( '<b>Note:</b> Minimum amount to withdraw is %s', '[FRONTEND] Withdraw modal', 'yith-woocommerce-affiliates' ), wc_price( $min_withdraw, array( 'currency' => YITH_WCAF_Withdraws()->get_currency() ) ) );
+			}
+
+			if ( 0 < $max_withdraw ) {
+				// translators: 1. Maximum amount for the withdraw.
+				$modal_notes['max-withdraw'] = sprintf( _x( '<b>Note:</b> You can withdraw at most your available balance, which is %s', '[FRONTEND] Withdraw modal', 'yith-woocommerce-affiliates' ), wc_price( $max_withdraw, array( 'currency' => YITH_WCAF_Withdraws()->get_currency() ) ) );
+			}
+
+			if ( $pay_only_old_commissions ) {
+				$modal_notes['min-commissions-age'] = sprintf(
+				// translators: 1. Minimum age required for a commission to be paid (in number of days).
+					_nx(
+						'<b>Note:</b> our system will only take into account commissions that are older than <b>%d day</b>.',
+						'<b>Note:</b> our system will only take into account commissions that are older than <b>%d days</b>.',
+						$payment_commission_age,
+						'[FRONTEND] Message above payment tab',
+						'yith-woocommerce-affiliates'
+					),
+					$payment_commission_age
+				);
+			}
 
 			$atts = array_merge(
 				$atts,
 				array(
 					'affiliate'         => $affiliate,
 					'formatted_profile' => $affiliate->get_formatted_invoice_profile(),
-					'max_withdraw'      => round( $affiliate->get_balance(), 2 ),
-					'min_withdraw'      => round( YITH_WCAF_Withdraws()->get_minimum_withdraw(), 2 ),
+					'profile'           => array_filter( $affiliate->get_invoice_profile() ),
+					'max_withdraw'      => $max_withdraw,
+					'min_withdraw'      => $min_withdraw,
 					'require_invoice'   => YITH_WCAF_Invoices()->are_invoices_required(),
 					/**
 					 * APPLY_FILTERS: yith_wcaf_withdraw_info_panel_additional_notes
@@ -290,16 +320,16 @@ if ( ! class_exists( 'YITH_WCAF_Abstract_Dashboard' ) ) {
 					 *
 					 * @param string $notes Additional notes.
 					 */
-					'modal_notes'       => apply_filters( 'yith_wcaf_withdraw_info_panel_additional_notes', '' ),
+					'modal_notes'       => apply_filters( 'yith_wcaf_withdraw_info_panel_additional_notes', implode( '<br/>', array_map( fn ( $note, $type ) => "<span class='$type-note'>$note</span>", $modal_notes, array_keys( $modal_notes ) ) ) ),
 				),
 				YITH_WCAF_Invoices()->get_options()
 			);
 
-			yith_wcaf_get_template( 'withdraw-modal.php', $atts, 'shortcodes/dashboard-payments' );
+			yith_wcaf_get_template( 'withdraw-modal.php', $atts, 'shortcodes/dashboard-summary' );
 		}
 
 		/**
-		 * Print notice message above payments view, to beter specify payments method/requirements
+		 * Print notice message above payments view, to better specify payments method/requirements
 		 *
 		 * @param string $section Section where we're printing navigation.
 		 * @param array  $atts    Array of attributes for current section.
@@ -331,15 +361,13 @@ if ( ! class_exists( 'YITH_WCAF_Abstract_Dashboard' ) ) {
 					return;
 				}
 
-				if ( ! $affiliate->is_valid() ) {
-					$message_parts[] = _x( '<b>Note:</b> you\'ll be able to request your first payment after your application request has been reviewed and approved.', '[FRONTEND] Message above payment tab', 'yith-woocommerce-affiliates' );
-				} elseif ( ! $affiliate->has_unpaid_commissions() ) {
-					$message_parts[] = _x( '<b>Note:</b> you\'ll be able to request a payment after your first commission is generated and confirmed.', '[FRONTEND] Message above payment tab', 'yith-woocommerce-affiliates' );
-				} elseif ( $affiliate->has_active_payments() ) {
-					$message_parts[] = _x( '<b>Note:</b> you\'ll be able to request a payment after your current pending payment is processed and completed.', '[FRONTEND] Message above payment tab', 'yith-woocommerce-affiliates' );
-				} elseif ( $payment_threshold && $affiliate->get_balance() <= $payment_threshold - 0.01 ) {
-					// translators: 1. Minimum balance for withdraw.
-					$message_parts[] = sprintf( _x( '<b>Note:</b> you\'ll be able to request a payment as soon as you collect a minimum of <b>%s</b>.', '[FRONTEND] Message above payment tab', 'yith-woocommerce-affiliates' ), wc_price( $payment_threshold ) );
+				$errors = $affiliate->can_withdraw();
+
+				if ( is_wp_error( $errors ) ) {
+					$message_parts = array_merge(
+						$message_parts,
+						$errors->get_error_messages()
+					);
 				}
 			} else {
 				switch ( $payment_type ) {
@@ -374,25 +402,23 @@ if ( ! class_exists( 'YITH_WCAF_Abstract_Dashboard' ) ) {
 						break;
 				}
 
-				if ( ! empty( $message_parts ) ) {
-					if ( 'manually' !== $payment_type && $pay_only_old_commissions ) {
-						$message_parts[] = sprintf(
-							// translators: 1. Minimum age required for a commission to be paid (in number of days).
-							_nx(
-								'Note that our system will only take into account commissions that are older than <b>%d day</b>.',
-								'Note that our system will only take into account commissions that are older than <b>%d days</b>.',
-								$payment_commission_age,
-								'[FRONTEND] Message above payment tab',
-								'yith-woocommerce-affiliates'
-							),
-							$payment_commission_age
-						);
-					}
-
-					if ( class_exists( 'YITH_WCAF_New_Affiliate_Payment_Email' ) ) {
-						$message_parts[] = _x( 'In order to be informed of any new payment issued to your account, make sure you enable the email notification option in <b>Affiliate Dashboard &gt; Settings</b>.', '[FRONTEND] Message above payment tab', 'yith-woocommerce-affiliates' );
-					}
+				if ( 'manually' !== $payment_type && class_exists( 'YITH_WCAF_New_Affiliate_Payment_Email' ) ) {
+					$message_parts[] = _x( 'In order to be informed of any new payment issued to your account, make sure you enable the email notification option in <b>Affiliate Dashboard &gt; Settings</b>.', '[FRONTEND] Message above payment tab', 'yith-woocommerce-affiliates' );
 				}
+			}
+
+			if ( $pay_only_old_commissions ) {
+				$message_parts[] = sprintf(
+				// translators: 1. Minimum age required for a commission to be paid (in number of days).
+					_nx(
+						'<b>Note:</b> our system will only take into account commissions that are older than <b>%d day</b>.',
+						'<b>Note:</b> our system will only take into account commissions that are older than <b>%d days</b>.',
+						$payment_commission_age,
+						'[FRONTEND] Message above payment tab',
+						'yith-woocommerce-affiliates'
+					),
+					$payment_commission_age
+				);
 			}
 
 			if ( empty( $message_parts ) ) {
@@ -433,6 +459,52 @@ if ( ! class_exists( 'YITH_WCAF_Abstract_Dashboard' ) ) {
 		 * @param array $atts Array of attributes for current dashboard page.
 		 */
 		public static function output_affiliate_stats( $atts = array() ) {
+			$affiliate = YITH_WCAF_Affiliate_Factory::get_current_affiliate();
+
+			if ( ! $affiliate ) {
+				return;
+			}
+
+			// retrieve affiliate stats.
+			$affiliate_total_balance     = $affiliate->get_balance( 'total' );
+			$affiliate_available_balance = $affiliate->get_balance();
+			$affiliate_earnings          = $affiliate->get_earnings();
+			$affiliate_paid              = $affiliate->get_paid() - $affiliate->get_payments( array( 'status' => 'on-hold' ) )->get_total_amount();
+			$affiliate_refunds           = $affiliate->get_refunds();
+			$affiliate_rate              = yith_wcaf_get_formatted_rate( $affiliate );
+			$affiliate_conversion        = yith_wcaf_rate_format( $affiliate->get_conversion_rate() );
+			$affiliate_visits            = yith_wcaf_number_format( $affiliate->get_clicks_count() );
+			$affiliate_visits_today      = yith_wcaf_number_format( $affiliate->count_clicks( array( 'interval' => array( 'start_date' => gmdate( 'Y-m-d 00:00:00' ) ) ) ) );
+			$show_active_balance         = ! ! $affiliate_total_balance;
+
+			// compose help desc for balance box.
+			$balance_description = __( 'The current balance is the total amount of money in your account, while the available balance reflects the funds that you can withdraw.', 'yith-woocommerce-affiliates' );
+
+			$pay_only_old_commissions = yith_plugin_fw_is_true( get_option( 'yith_wcaf_payment_pay_only_old_commissions', 'no' ) );
+			$payment_commission_age   = (int) get_option( 'yith_wcaf_payment_commission_age', 15 );
+
+			if ( $pay_only_old_commissions && $payment_commission_age ) {
+				// translators: 1. Commissions age, as an integer value.
+				$balance_description .= '<br/>' . sprintf( __( 'Our system will only take into account commissions that are older than %d days.', 'yith-woocommerce-affiliates' ), $payment_commission_age );
+			}
+
+			$atts = array_merge(
+				$atts,
+				compact(
+					'affiliate_total_balance',
+					'affiliate_available_balance',
+					'affiliate_earnings',
+					'affiliate_paid',
+					'affiliate_refunds',
+					'affiliate_rate',
+					'affiliate_conversion',
+					'affiliate_visits',
+					'affiliate_visits_today',
+					'balance_description',
+					'show_active_balance'
+				)
+			);
+
 			yith_wcaf_get_template( 'affiliate-stats.php', $atts, 'shortcodes/dashboard-summary' );
 		}
 
@@ -473,17 +545,18 @@ if ( ! class_exists( 'YITH_WCAF_Abstract_Dashboard' ) ) {
 		 * Render withdraw modal opener
 		 */
 		public static function output_withdraw_modal_opener() {
-			if ( ! class_exists( 'YITH_WCAF_Withdraws' ) || ! YITH_WCAF_Withdraws()->should_show_withdraw_popup() ) {
+			if ( ! class_exists( 'YITH_WCAF_Withdraws' ) || ! YITH_WCAF_Withdraws()->is_withdraw_enabled() ) {
 				return;
 			}
 
-			$affiliate = YITH_WCAF_Affiliate_Factory::get_current_affiliate();
+			$affiliate                  = YITH_WCAF_Affiliate_Factory::get_current_affiliate();
+			$should_show_withdraw_popup = YITH_WCAF_Withdraws()->should_show_withdraw_popup();
+			$can_withdraw               = $affiliate->can_withdraw();
+			$error_notes                = is_wp_error( $can_withdraw ) ? $can_withdraw->get_error_messages() : array();
 
-			$atts = array(
-				'affiliate' => $affiliate,
-			);
+			$atts = compact( 'affiliate', 'should_show_withdraw_popup', 'error_notes' );
 
-			yith_wcaf_get_template( 'withdraw-modal-opener.php', $atts, 'shortcodes/dashboard-payments' );
+			yith_wcaf_get_template( 'withdraw-modal-opener.php', $atts, 'shortcodes/dashboard-summary' );
 		}
 
 		/**
@@ -648,7 +721,7 @@ if ( ! class_exists( 'YITH_WCAF_Abstract_Dashboard' ) ) {
 				$navigation_menu['summary'] = array(
 					'label'  => __( 'Dashboard', 'yith-woocommerce-affiliates' ),
 					'url'    => $this->get_dashboard_url(),
-					'active' => empty( $current_endpoint ),
+					'active' => empty( $current_endpoint ) || 'summary' === $current_endpoint,
 				);
 			}
 

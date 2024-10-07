@@ -345,7 +345,7 @@ if ( ! class_exists( 'YITH_WCAF_Abstract_Admin_Table' ) ) {
 			// translators: 1. Order number 2. Username.
 			$column .= sprintf(
 				'<a href="%1$s">#%2$s</a><div class="order-details">%3$s %4$s</div>',
-				get_edit_post_link( $order_id ),
+				$item->get_order_edit_url(),
 				$order->get_order_number(),
 				_x( 'by', '[ADMIN] Commission order column', 'yith-woocommerce-affiliates' ),
 				$username

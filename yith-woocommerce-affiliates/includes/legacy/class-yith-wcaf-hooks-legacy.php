@@ -38,6 +38,7 @@ if ( ! class_exists( 'YITH_WCAF_Hooks_Legacy' ) ) {
 			'yith_wcaf_available_admin_tabs'              => 'yith_wcaf_admin_tabs_control',
 			'yith_wcaf_check_affiliate_validation_errors' => 'yith_wcaf_check_affiliate_validation_error',
 			'yith_wcaf_commission_table_columns'          => 'yith_wcaf_comission_table_columns',
+			'yith_wcaf_commissions_metabox_commissions_total_formatted' => 'yith_wcaf_commissions_metabox_total',
 		);
 
 		/**
@@ -52,6 +53,13 @@ if ( ! class_exists( 'YITH_WCAF_Hooks_Legacy' ) ) {
 			'yith_wcaf_affiliate_payment_email_updated'  => '2.0.0',
 			'yith_wcaf_affiliate_registration_form_atts' => '2.0.0',
 			'yith_wcaf_user_details_affiliates_table'    => '2.0.0',
+			'yith_wcaf_display_symbol'                   => '2.0.0',
+			'yith_wcaf_display_format'                   => '2.0.0',
+			'yith_wcaf_payment_table_column_default'     => '2.0.0',
+			'yith_wcaf_refeal_totals_table'              => '2.0.0',
+			'yith_wcaf_admin_tabs_control'               => '2.0.0',
+			'yith_wcaf_check_affiliate_validation_error' => '2.0.0',
+			'yith_wcaf_comission_table_columns'          => '2.0.0',
 		);
 
 		/**
@@ -78,6 +86,16 @@ if ( ! class_exists( 'YITH_WCAF_Hooks_Legacy' ) ) {
 				$return_value = $this->trigger_hook( $old_hook, $new_callback_args );
 			}
 			return $return_value;
+		}
+
+		/**
+		 * Get deprecated version.
+		 *
+		 * @param string $old_hook Old hook name.
+		 * @return string
+		 */
+		protected function get_deprecated_version( $old_hook ) {
+			return ! empty( $this->deprecated_version[ $old_hook ] ) ? $this->deprecated_version[ $old_hook ] : YITH_WCAF::VERSION;
 		}
 
 		/**

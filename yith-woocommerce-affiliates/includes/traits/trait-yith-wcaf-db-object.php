@@ -64,6 +64,15 @@ if ( ! trait_exists( 'YITH_WCAF_Trait_DB_Object' ) ) {
 		protected $props_to_columns = array();
 
 		/**
+		 * Returns name of the table for current DB Object
+		 *
+		 * @return string Table name.
+		 */
+		public function get_table() {
+			return $this->table;
+		}
+
+		/**
 		 * Save object into database
 		 *
 		 * @param WC_Data $object Object to save.
@@ -238,16 +247,33 @@ if ( ! trait_exists( 'YITH_WCAF_Trait_DB_Object' ) ) {
 		}
 
 		/**
+		 * Generates where clause for the query, given a set of arguments
+		 *
+		 * @param array $args       Array of query arguments.
+		 * @param array $query_args Array of parameters to build up into the query (reference).
+		 * @return string Where clause.
+		 */
+		protected function generate_query_where_clause( $args = array(), &$query_args = array() ) {
+			return ' WHERE 1=1';
+		}
+
+		/**
 		 * Generate orderby clause starting from data submitted for the query
 		 *
-		 * @param string|array $orderby Order by value; can be a simple column name, or an array containing a list of columns
-		 *                              In the array, each column can also specify values (for a FILED ordering) and order, to use instead of general one.
-		 * @param string       $order   Order value.
-		 * @param string|bool  $context Context for the orderby clause.
+		 * @param array       $args       Array of query arguments.
+		 * @param array       $query_args Array of parameters to build up into the query (reference).
+		 * @param string|bool $context    Context for the orderby clause.
 		 *
 		 * @return string Order by clause.
 		 */
-		protected function generate_query_orderby_clause( $orderby, $order, $context = false ) {
+		protected function generate_query_orderby_clause( $args = array(), &$query_args = array(), $context = false ) {
+			list( $orderby, $order, $fields ) = yith_plugin_fw_extract( $args, 'orderby', 'order', 'fields' );
+
+			// if not specified, or if counting, return empty clause.
+			if ( ! $orderby || 'count' === $fields ) {
+				return '';
+			}
+
 			$orderby = (array) $orderby;
 			$order   = strtoupper( $order );
 			$clause  = '';
@@ -285,6 +311,24 @@ if ( ! trait_exists( 'YITH_WCAF_Trait_DB_Object' ) ) {
 			$clause = ' ORDER BY ' . rtrim( $clause, ',' );
 
 			return $clause;
+		}
+
+		/**
+		 * Generate limit clause starting from data submitted for the query
+		 *
+		 * @param array $args       Array of query arguments.
+		 * @param array $query_args Array of parameters to build up into the query (reference).
+		 *
+		 * @return string Limit clause.
+		 */
+		protected function generate_query_limit_clause( $args = array(), &$query_args = array() ) {
+			list( $limit, $offset, $fields ) = yith_plugin_fw_extract( $args, 'limit', 'offset', 'fields' );
+
+			if ( (int) $limit <= 0 || 'count' === $fields ) {
+				return '';
+			}
+
+			return sprintf( ' LIMIT %d, %d', $offset ?: 0, $limit );
 		}
 
 		/**

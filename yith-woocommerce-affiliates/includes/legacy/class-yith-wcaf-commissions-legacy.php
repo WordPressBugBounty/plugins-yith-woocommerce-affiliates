@@ -46,7 +46,7 @@ if ( ! class_exists( 'YITH_WCAF_Commissions_Legacy' ) ) {
 			_deprecated_function( __METHOD__, '2.0.0', '\YITH_WCAF_Commission_Data_Store::create' );
 
 			try {
-				$commission = new YITH_WCAF_Commission( $commission_args );
+				$commission = YITH_WCAF_Commission_Factory::create_commission( $commission_args );
 				$commission->save();
 			} catch ( Exception $e ) {
 				return false;

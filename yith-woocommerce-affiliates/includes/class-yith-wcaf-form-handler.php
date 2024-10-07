@@ -313,37 +313,7 @@ if ( ! class_exists( 'YITH_WCAF_Form_Handler' ) ) {
 		 * @return void
 		 */
 		public static function register_affiliate_for_customer( $customer_id ) {
-			$auto_enable = 'yes' === get_option( 'yith_wcaf_referral_registration_auto_enable' );
-
-			$affiliate = new YITH_WCAF_Affiliate();
-			$affiliate->set_user_id( $customer_id );
-			$affiliate->update_meta_data( 'application_date', current_time( 'mysql' ) );
-
-			foreach ( self::$posted_data as $key => $value ) {
-				$affiliate->update_meta_data( $key, $value );
-			}
-
-			if ( $auto_enable ) {
-				$affiliate->set_status( 'enabled' );
-			}
-
-			if ( ! empty( self::$posted_data['first_name'] ) || ! empty( self::$posted_data['last_name'] ) ) {
-				wp_update_user(
-					array_merge(
-						array(
-							'ID' => $customer_id,
-						),
-						empty( self::$posted_data['first_name'] ) ? array() : array(
-							'first_name' => self::$posted_data['first_name'],
-						),
-						empty( self::$posted_data['last_name'] ) ? array() : array(
-							'last_name' => self::$posted_data['last_name'],
-						)
-					)
-				);
-			}
-
-			$id = $affiliate->save();
+			$affiliate = YITH_WCAF_Affiliate_Factory::make_user_an_affiliate( $customer_id, self::$posted_data );
 
 			// trigger new affiliate action.
 			/**
@@ -354,7 +324,7 @@ if ( ! class_exists( 'YITH_WCAF_Form_Handler' ) ) {
 			 * @param int                 $id        Affiliate id.
 			 * @param YITH_WCAF_Affiliate $affiliate Affiliate object.
 			 */
-			do_action( 'yith_wcaf_new_affiliate_registration', $id, $affiliate );
+			do_action( 'yith_wcaf_new_affiliate_registration', $affiliate->get_id(), $affiliate );
 		}
 
 		/**

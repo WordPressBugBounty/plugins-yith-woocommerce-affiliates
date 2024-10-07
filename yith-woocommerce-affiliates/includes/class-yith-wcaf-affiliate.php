@@ -58,7 +58,7 @@ if ( ! class_exists( 'YITH_WCAF_Affiliate' ) ) {
 		/**
 		 * Constructor
 		 *
-		 * @param int|string|\YITH_WCAF_Affiliate $affiliate Affiliate identifier.
+		 * @param int|string|array|\YITH_WCAF_Affiliate $affiliate Affiliate identifier or props.
 		 *
 		 * @throws Exception When not able to load Data Store class.
 		 */
@@ -85,6 +85,12 @@ if ( ! class_exists( 'YITH_WCAF_Affiliate' ) ) {
 				$this->set_id( $affiliate->get_id() );
 			} elseif ( is_string( $affiliate ) ) {
 				$this->set_token( $affiliate );
+			} elseif ( is_array( $affiliate ) && isset( $affiliate['id'] ) ) {
+				$this->set_id( (int) $affiliate['id'] );
+				unset( $affiliate['id'] );
+			} elseif ( is_array( $affiliate ) && isset( $affiliate['token'] ) ) {
+				$this->set_token( (string) $affiliate['token'] );
+				unset( $affiliate['token'] );
 			} else {
 				$this->set_object_read( true );
 			}
@@ -94,6 +100,8 @@ if ( ! class_exists( 'YITH_WCAF_Affiliate' ) ) {
 			if ( $this->get_id() > 0 || ! empty( $this->get_token() ) ) {
 				$this->data_store->read( $this );
 			}
+
+			is_array( $affiliate ) && $this->set_props( $affiliate );
 		}
 
 		/* === GETTERS === */
@@ -249,17 +257,17 @@ if ( ! class_exists( 'YITH_WCAF_Affiliate' ) ) {
 		 *
 		 * @return float Return total earnings.
 		 */
-		public function get_balance( $context = 'view', $recalculate = false ) {
+		public function get_total_balance( $context = 'view', $recalculate = false ) {
 			if ( ! $recalculate ) {
 				return max( 0, $this->get_earnings( $context ) - $this->get_paid( $context ) );
 			} else {
-				$commissions = YITH_WCAF_Commissions()->get_commissions(
+				$commissions = $this->get_commissions(
 					array(
 						'status' => 'pending',
 					)
 				);
 
-				if ( empty( $commissions ) ) {
+				if ( $commissions->is_empty() ) {
 					return 0;
 				}
 
@@ -268,17 +276,75 @@ if ( ! class_exists( 'YITH_WCAF_Affiliate' ) ) {
 		}
 
 		/**
+		 * Get available balance for the affiliate
+		 *
+		 * @param string $context Context of the operation.
+		 * @return float Return available balance.
+		 */
+		public function get_available_balance( $context = 'view' ) {
+			$pay_only_old_commissions = yith_plugin_fw_is_true( get_option( 'yith_wcaf_payment_pay_only_old_commissions', 'no' ) );
+			$payment_commission_age   = (int) get_option( 'yith_wcaf_payment_commission_age', 15 );
+
+			if ( ! $pay_only_old_commissions || ! $payment_commission_age ) {
+				return $this->get_total_balance( $context );
+			}
+
+			$threshold_time = time() - ( $payment_commission_age * DAY_IN_SECONDS );
+
+			$commissions = YITH_WCAF_Commissions()->get_commissions(
+				array(
+					'status'       => 'pending',
+					'affiliate_id' => $this->get_id(),
+					'interval'     => array(
+						'end_date' => gmdate( 'Y-m-d H:i:s', $threshold_time ),
+					),
+				)
+			);
+
+			if ( $commissions->is_empty() ) {
+				return 0;
+			}
+
+			return $commissions->get_total_amount();
+		}
+
+		/**
+		 * Returns balance for current affiliate
+		 *
+		 * @param string $type    Type of balance to retrieve.
+		 * @param string $context Context of the operation.
+		 *
+		 * @return float Return balance for current affiliate.
+		 */
+		public function get_balance( $type = 'available', $context = 'view' ) {
+			$getter = "get_{$type}_balance";
+
+			if ( ! method_exists( $this, $getter ) ) {
+				return 0;
+			}
+
+			return (float) $this->$getter( $context );
+		}
+
+		/**
 		 * Return formatted balance for current affiliate
 		 *
+		 * @param string $type    Type of balance to retrieve and format.
 		 * @param string $context Context of the operation.
 		 * @param array  $args    Additional arguments for wc_price function.
 		 *
 		 * @return string Formatted affiliate balance.
 		 */
-		public function get_formatted_balance( $context = 'view', $args = array() ) {
-			$amount = (float) $this->get_balance( $context );
-
-			return wc_price( $amount, $args );
+		public function get_formatted_balance( $type = 'available', $context = 'view', $args = array() ) {
+			return wc_price(
+				$this->get_balance( $type, $context ),
+				array_merge(
+					class_exists( 'YITH_WCAF_Withdraws' ) ? array(
+						'currency' => YITH_WCAF_Withdraws()->get_currency(),
+					) : array(),
+					$args
+				)
+			);
 		}
 
 		/**
@@ -745,8 +811,8 @@ if ( ! class_exists( 'YITH_WCAF_Affiliate' ) ) {
 			// clean resulting address, by removing empty lines and remaining placeholders.
 			$profile_components = explode( "\n", $textual_profile );
 			$profile_components = array_map(
-				function( $component ) {
-					$component = preg_replace( '/\{\{[^}]+\}\}/', '', $component );
+				function ( $component ) {
+					$component = preg_replace( '/\{\{[^}]+}}/', '', $component );
 
 					return trim( $component, ", \n\r\t\v\x00" );
 				},
@@ -795,6 +861,13 @@ if ( ! class_exists( 'YITH_WCAF_Affiliate' ) ) {
 				$is_banned = $this->is_banned();
 
 				$this->admin_actions = array_merge(
+					array(
+						'view_profile' => array(
+							'label' => _x( 'View profile', '[ADMIN] Single affiliate actions', 'yith-woocommerce-affiliates' ),
+							'tip'   => _x( 'View user profile', '[ADMIN] Single affiliate actions', 'yith-woocommerce-affiliates' ),
+							'url'   => get_edit_user_link( $this->get_user_id() ),
+						),
+					),
 					! $is_banned && ! $this->has_status( 'enabled' ) ? array(
 						'enable' => array(
 							'label' => _x( 'Enable affiliate', '[ADMIN] Single affiliate actions', 'yith-woocommerce-affiliates' ),
@@ -925,7 +998,7 @@ if ( ! class_exists( 'YITH_WCAF_Affiliate' ) ) {
 
 			$return = array_merge(
 				array(
-					'ID'    => $this->get_id(),
+					'id'    => $this->get_id(),
 					'token' => $this->get_token(),
 				),
 				$data,
@@ -1132,19 +1205,46 @@ if ( ! class_exists( 'YITH_WCAF_Affiliate' ) ) {
 		/**
 		 * Checks if user can withdraw from his/her earnings
 		 *
-		 * @return bool Whether affiliate can withdraw or not.
+		 * @return bool|WP_Error Whether affiliate can withdraw or not.
 		 */
 		public function can_withdraw() {
+			$minimum_withdraw       = class_exists( 'YITH_WCAF_Withdraws' ) ? YITH_WCAF_Withdraws()->get_minimum_withdraw() : 0;
+			$available_balance      = $this->get_available_balance();
+			$is_valid               = $this->is_valid();
+			$has_active_payments    = $this->has_active_payments();
+			$has_unpaid_commissions = $this->has_unpaid_commissions();
+			$has_enough_balance     = $available_balance && $available_balance > $minimum_withdraw;
+
 			/**
 			 * APPLY_FILTERS: yith_wcaf_can_affiliate_withdraw
 			 *
-			 * Filters whether affiliates can withdraw (has unpaid commissions and no active payment).
+			 * Filters whether affiliates can withdraw (has unpaid commissions and no active payment, balance is enough).
 			 *
 			 * @param bool                             $can_withdraw Whether affiliate can withdraw.
 			 * @param int                              $id          Affiliate id.
 			 * @param YITH_WCAF_Affiliate              $affiliate   Affiliate object.
 			 */
-			return apply_filters( 'yith_wcaf_can_affiliate_withdraw', $this->is_valid() && ! $this->has_active_payments() && $this->has_unpaid_commissions(), $this->get_id(), $this );
+			$can_withdraw = apply_filters( 'yith_wcaf_can_affiliate_withdraw', $is_valid && ! $has_active_payments && $has_unpaid_commissions && $has_enough_balance, $this->get_id(), $this );
+
+			if ( ! $can_withdraw ) {
+				$errors = new WP_Error();
+
+				! $is_valid && $errors->add( 'INVALID_AFFILIATE', _x( '<b>Note:</b> you\'ll be able to request your first payment after your application request has been reviewed and approved.', '[FRONTEND] Withdraw error message', 'yith-woocommerce-affiliates' ) );
+				! ! $has_active_payments && $errors->add( 'ALREADY_HAS_ACTIVE_PAYMENT', _x( '<b>Note:</b> you\'ll be able to request a payment after your current pending payment is processed and completed.', '[FRONTEND] Withdraw error message', 'yith-woocommerce-affiliates' ) );
+				! $has_unpaid_commissions && $errors->add( 'NO_UNPAID_COMMISSION', _x( '<b>Note:</b> you\'ll be able to request a payment after at least one commission is generated and confirmed.', '[FRONTEND] Message above payment tab', 'yith-woocommerce-affiliates' ) );
+				! $has_enough_balance && $errors->add(
+					'NOT_ENOUGH_BALANCE',
+					sprintf(
+					// translators: 1. Minimum balance for withdraw.
+						_x( '<b>Note:</b> you\'ll be able to request a payment as soon as you collect a minimum of <b>%s</b>.', '[FRONTEND] Message above payment tab', 'yith-woocommerce-affiliates' ),
+						wc_price( $minimum_withdraw, array( 'currency' => YITH_WCAF_Withdraws()->get_currency() ) )
+					)
+				);
+
+				return $errors;
+			}
+
+			return true;
 		}
 
 		/* === CLICKS === */

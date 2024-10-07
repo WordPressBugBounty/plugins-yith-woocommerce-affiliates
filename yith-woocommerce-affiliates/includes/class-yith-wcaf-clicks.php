@@ -172,9 +172,7 @@ if ( ! class_exists( 'YITH_WCAF_Clicks' ) ) {
 				return;
 			}
 
-			$click = new YITH_WCAF_Click();
-
-			$click->set_props(
+			$click = YITH_WCAF_Click_Factory::create_click(
 				array(
 					'affiliate_id' => $affiliate->get_id(),
 					'link'         => $requester_link,
@@ -182,6 +180,7 @@ if ( ! class_exists( 'YITH_WCAF_Clicks' ) ) {
 					'origin'       => $requester_origin,
 				)
 			);
+
 			$click->save();
 		}
 

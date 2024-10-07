@@ -85,6 +85,9 @@ if ( ! class_exists( 'YITH_WCAF_Admin_Actions' ) ) {
 
 			if ( isset( $_REQUEST['redirect_to'] ) ) {
 				$redirect = sanitize_text_field( wp_unslash( $_REQUEST['redirect_to'] ) );
+			} elseif ( is_array( $return ) && isset( $return['redirect_to'] ) ) {
+				$redirect = $return['redirect_to'];
+				unset( $return['redirect_to'] );
 			} else {
 				$redirect = YITH_WCAF_Admin()->get_tab_url();
 			}

@@ -60,7 +60,7 @@ if ( ! class_exists( 'YITH_WCAF_Payment' ) ) {
 		/**
 		 * Constructor
 		 *
-		 * @param int|\YITH_WCAF_Payment $payment Payment identifier.
+		 * @param int|array|\YITH_WCAF_Payment $payment Payment identifier or props.
 		 *
 		 * @throws Exception When not able to load Data Store class.
 		 */
@@ -84,6 +84,9 @@ if ( ! class_exists( 'YITH_WCAF_Payment' ) ) {
 				$this->set_id( $payment );
 			} elseif ( $payment instanceof self ) {
 				$this->set_id( $payment->get_id() );
+			} elseif ( is_array( $payment ) && isset( $payment['id'] ) ) {
+				$this->set_id( $payment['id'] );
+				unset( $payment['id'] );
 			} else {
 				$this->set_object_read( true );
 			}
@@ -93,6 +96,8 @@ if ( ! class_exists( 'YITH_WCAF_Payment' ) ) {
 			if ( $this->get_id() > 0 ) {
 				$this->data_store->read( $this );
 			}
+
+			is_array( $payment ) && $this->set_props( $payment );
 		}
 
 		/* === GETTERS === */
