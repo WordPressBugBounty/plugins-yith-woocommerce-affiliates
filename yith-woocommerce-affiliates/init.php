@@ -3,13 +3,14 @@
  * Plugin Name: YITH WooCommerce Affiliates
  * Plugin URI: https://yithemes.com/themes/plugins/yith-woocommerce-affiliates/
  * Description: <code><strong>YITH WooCommerce Affiliates</strong></code> allows your users to become affiliates on your site earning commissions on every sale generated through their exclusive affiliation links. Create a sales network at no cost and increase your incomes just like big stores. <a href="https://yithemes.com/" target="_blank">Get more plugins for your e-commerce on <strong>YITH</strong></a>
- * Version: 3.11.0
+ * Version: 3.13.0
  * Author: YITH
  * Author URI: https://yithemes.com/
  * Text Domain: yith-woocommerce-affiliates
  * Domain Path: /languages/
- * WC requires at least: 9.1
- * WC tested up to: 9.3
+ * WC requires at least: 9.3
+ * WC tested up to: 9.5
+ * Requires Plugins: woocommerce
  *
  * @author  YITH <plugins@yithemes.com>
  * @package YITH/Affiliates
@@ -38,7 +39,9 @@ if ( ! function_exists( 'yith_affiliates_constructor' ) ) {
 	 * @return YITH_WCAF
 	 */
 	function yith_affiliates_constructor() {
-		load_plugin_textdomain( 'yith-woocommerce-affiliates', false, plugin_basename( YITH_WCAF_LANG ) );
+		if ( function_exists( 'yith_plugin_fw_load_plugin_textdomain' ) ) {
+			yith_plugin_fw_load_plugin_textdomain( 'yith-woocommerce-affiliates', plugin_basename( YITH_WCAF_LANG ) );
+		}
 
 		require_once YITH_WCAF_INC . 'class-yith-wcaf.php';
 
@@ -116,11 +119,10 @@ if ( ! function_exists( 'yith_wcaf_maybe_load_plugin_fw' ) ) {
 	 * @return void.
 	 */
 	function yith_wcaf_maybe_load_plugin_fw() {
-		if ( ! function_exists( 'yit_maybe_plugin_fw_loader' ) && file_exists( YITH_WCAF_DIR . 'plugin-fw/init.php' ) ) {
-			require_once YITH_WCAF_DIR . 'plugin-fw/init.php';
+		// Plugin Framework Loader.
+		if ( file_exists( plugin_dir_path( __FILE__ ) . 'plugin-fw/init.php' ) ) {
+			require_once plugin_dir_path( __FILE__ ) . 'plugin-fw/init.php';
 		}
-
-		yit_maybe_plugin_fw_loader( YITH_WCAF_DIR );
 
 		// activation hook.
 		if ( ! function_exists( 'yith_plugin_registration_hook' ) ) {

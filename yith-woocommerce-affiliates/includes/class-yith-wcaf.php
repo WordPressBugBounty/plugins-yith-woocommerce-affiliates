@@ -25,7 +25,7 @@ if ( ! class_exists( 'YITH_WCAF' ) ) {
 		 * @const string
 		 * @since 2.0.0
 		 */
-		const VERSION = '3.11.0';
+		const VERSION = '3.13.0';
 
 		/**
 		 * Plugin version
@@ -68,8 +68,6 @@ if ( ! class_exists( 'YITH_WCAF' ) ) {
 			// start by requiring and initializing dependencies.
 			$this->install();
 
-			// load plugin-fw.
-			add_action( 'plugins_loaded', array( $this, 'plugin_fw_loader' ), 15 );
 			add_action( 'plugins_loaded', array( $this, 'privacy_loader' ), 20 );
 
 			// enqueue frontend scripts.
@@ -205,24 +203,6 @@ if ( ! class_exists( 'YITH_WCAF' ) ) {
 					'referral_var'        => YITH_WCAF_Session()->get_ref_name(),
 				)
 			);
-		}
-
-		/* === PLUGIN FW LOADER === */
-
-		/**
-		 * Loads plugin fw, if not yet created
-		 *
-		 * @return void
-		 * @since 1.0.0
-		 */
-		public function plugin_fw_loader() {
-			if ( ! defined( 'YIT_CORE_PLUGIN' ) ) {
-				global $plugin_fw_data;
-				if ( ! empty( $plugin_fw_data ) ) {
-					$plugin_fw_file = array_shift( $plugin_fw_data );
-					require_once $plugin_fw_file;
-				}
-			}
 		}
 
 		/* === PRIVACY LOADER === */
