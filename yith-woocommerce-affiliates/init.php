@@ -3,7 +3,7 @@
  * Plugin Name: YITH WooCommerce Affiliates
  * Plugin URI: https://yithemes.com/themes/plugins/yith-woocommerce-affiliates/
  * Description: <code><strong>YITH WooCommerce Affiliates</strong></code> allows your users to become affiliates on your site earning commissions on every sale generated through their exclusive affiliation links. Create a sales network at no cost and increase your incomes just like big stores. <a href="https://yithemes.com/" target="_blank">Get more plugins for your e-commerce on <strong>YITH</strong></a>
- * Version: 3.16.0
+ * Version: 3.17.0
  * Author: YITH
  * Author URI: https://yithemes.com/
  * Text Domain: yith-woocommerce-affiliates
