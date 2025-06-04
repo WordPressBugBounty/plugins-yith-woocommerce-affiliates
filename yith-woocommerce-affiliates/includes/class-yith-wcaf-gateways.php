@@ -345,6 +345,8 @@ if ( ! class_exists( 'YITH_WCAF_Gateways' ) ) {
 					}
 				}
 
+				do_action( "yith_wcaf_after_gateway_{$gateway->get_id()}_fields", $gateway );
+
 				self::maybe_close_form_container( $gateway, $selected );
 			}
 		}

@@ -198,7 +198,7 @@ if ( ! class_exists( 'YITH_WCAF_Affiliate_Dashboard_Shortcode' ) ) {
 				$commissions = $affiliate->get_commissions(
 					array(
 						'status__not_in' => 'trash',
-						'order_by'       => 'created_at',
+						'orderby'        => 'created_at',
 						'order'          => 'DESC',
 						'limit'          => $atts['number_of_commissions'],
 					)
@@ -211,9 +211,9 @@ if ( ! class_exists( 'YITH_WCAF_Affiliate_Dashboard_Shortcode' ) ) {
 			if ( $show_clicks_summary ) {
 				$clicks = $affiliate->get_clicks(
 					array(
-						'order_by' => 'click_date',
-						'order'    => 'DESC',
-						'limit'    => $atts['number_of_clicks'],
+						'orderby' => 'click_date',
+						'order'   => 'DESC',
+						'limit'   => $atts['number_of_clicks'],
 					)
 				);
 			}

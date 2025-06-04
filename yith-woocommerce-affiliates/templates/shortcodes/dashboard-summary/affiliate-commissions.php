@@ -32,7 +32,7 @@ if ( ! defined( 'YITH_WCAF' ) ) {
 	<div class="dashboard-title">
 		<h3><?php echo esc_html_x( 'Recent Commissions', '[FRONTEND] Affiliate dashboard', 'yith-woocommerce-affiliates' ); ?></h3>
 
-		<?php if ( $commissions->has_next_page() ) : ?>
+		<?php if ( !! $commissions && $commissions->has_next_page() ) : ?>
 			<span class="view-all">
 				( <a href="<?php echo esc_url( YITH_WCAF_Dashboard()->get_dashboard_url( 'commissions' ) ); ?>"><?php echo esc_html_x( 'View all', '[FRONTEND] Affiliate dashboard', 'yith-woocommerce-affiliates' ); ?></a> )
 			</span>
