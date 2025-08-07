@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/yith-woocommerce-"
 "affiliates\n"
-"POT-Creation-Date: 2025-01-02T12:16:08+00:00\n"
+"POT-Creation-Date: 2025-08-07T12:37:28+00:00\n"
 "PO-Revision-Date: 2018-12-12 12:36+0100\n"
 "Last-Translator: \n"
 "Language-Team: Your Inspiration Themes <plugins@yithemes.com>\n"
@@ -20,6 +20,7 @@ msgstr ""
 "X-Poedit-SearchPathExcluded-0: plugin-fw\n"
 
 #. Description of the plugin
+#: init.php
 msgid ""
 "<code><strong>YITH WooCommerce Affiliates</strong></code> allows your users "
 "to become affiliates on your site earning commissions on every sale "
@@ -140,12 +141,14 @@ msgstr "Alaphelyzetbe állítás"
 
 #. translators: 1. Minimum amount for the withdraw.
 #: includes/abstracts/class-yith-wcaf-abstract-dashboard.php:285
+#, php-format
 msgctxt "[FRONTEND] Withdraw modal"
 msgid "<b>Note:</b> Minimum amount to withdraw is %s"
 msgstr ""
 
 #. translators: 1. Maximum amount for the withdraw.
 #: includes/abstracts/class-yith-wcaf-abstract-dashboard.php:290
+#, php-format
 msgctxt "[FRONTEND] Withdraw modal"
 msgid ""
 "<b>Note:</b> You can withdraw at most your available balance, which is %s"
@@ -154,6 +157,7 @@ msgstr ""
 #. translators: 1. Minimum age required for a commission to be paid (in number of days).
 #: includes/abstracts/class-yith-wcaf-abstract-dashboard.php:296
 #: includes/abstracts/class-yith-wcaf-abstract-dashboard.php:413
+#, php-format
 msgctxt "[FRONTEND] Message above payment tab"
 msgid ""
 "<b>Note:</b> our system will only take into account commissions that are "
@@ -166,6 +170,7 @@ msgstr[1] ""
 
 #. translators: 1. Minimum balance for payment.
 #: includes/abstracts/class-yith-wcaf-abstract-dashboard.php:377
+#, php-format
 msgctxt "[FRONTEND] Message above payment tab"
 msgid ""
 "<b>Note:</b> commissions will be paid automatically by our system as soon as "
@@ -174,6 +179,7 @@ msgstr ""
 
 #. translators: 1.Day of the month for the payment.
 #: includes/abstracts/class-yith-wcaf-abstract-dashboard.php:384
+#, php-format
 msgctxt "[FRONTEND] Message above payment tab"
 msgid ""
 "<b>Note:</b> commissions will be paid automatically by our system every "
@@ -182,6 +188,7 @@ msgstr ""
 
 #. translators: 1.Day of the month for the payment. 2. Minimum balance for payment.
 #: includes/abstracts/class-yith-wcaf-abstract-dashboard.php:391
+#, php-format
 msgctxt "[FRONTEND] Message above payment tab"
 msgid ""
 "<b>Note:</b> commissions will be paid automatically by our system every "
@@ -218,6 +225,7 @@ msgstr ""
 
 #. translators: 1. Commissions age, as an integer value.
 #: includes/abstracts/class-yith-wcaf-abstract-dashboard.php:488
+#, php-format
 msgid ""
 "Our system will only take into account commissions that are older than %d "
 "days."
@@ -325,7 +333,7 @@ msgstr "Művelet"
 
 #. translators: 1. Specific error message.
 #: includes/admin/admin-panels/class-yith-wcaf-affiliates-admin-panel.php:70
-#, fuzzy
+#, fuzzy, php-format
 msgctxt "[ADMIN] Affiliate screen notice message"
 msgid "There was an error while creating the affiliate: %s."
 msgstr "Hiba a kifizetés feldolgozása közben %s: %s"
@@ -350,7 +358,7 @@ msgstr "Kifizetés %s komplett"
 
 #. translators: 1. number fo affiliates updated.
 #: includes/admin/admin-panels/class-yith-wcaf-affiliates-admin-panel.php:81
-#, fuzzy
+#, fuzzy, php-format
 msgctxt "[ADMIN] Affiliate screen notice message"
 msgid "%s affiliates updated successfully."
 msgstr "Kifizetés %s komplett"
@@ -369,7 +377,7 @@ msgstr "Kifizetés %s komplett"
 
 #. translators: 1. number fo affiliates deleted.
 #: includes/admin/admin-panels/class-yith-wcaf-affiliates-admin-panel.php:89
-#, fuzzy
+#, fuzzy, php-format
 msgctxt "[ADMIN] Affiliate screen notice message"
 msgid "%s affiliates deleted successfully."
 msgstr "Kifizetés %s komplett"
@@ -387,6 +395,7 @@ msgstr ""
 
 #. translators: 1. number fo affiliates banned.
 #: includes/admin/admin-panels/class-yith-wcaf-affiliates-admin-panel.php:97
+#, php-format
 msgctxt "[ADMIN] Affiliate screen notice message"
 msgid "%s affiliates banned successfully."
 msgstr ""
@@ -404,6 +413,7 @@ msgstr ""
 
 #. translators: 1. number fo affiliates unbanned.
 #: includes/admin/admin-panels/class-yith-wcaf-affiliates-admin-panel.php:105
+#, php-format
 msgctxt "[ADMIN] Affiliate screen notice message"
 msgid "%s affiliates unbanned successfully."
 msgstr ""
@@ -557,7 +567,7 @@ msgstr "Kifizetés %s komplett"
 
 #. translators: 1. number fo commissions updated.
 #: includes/admin/admin-panels/class-yith-wcaf-commissions-admin-panel.php:72
-#, fuzzy
+#, fuzzy, php-format
 msgctxt "[ADMIN] Commissions action messages"
 msgid "%s commissions updated successfully."
 msgstr "Kifizetés %s komplett"
@@ -575,6 +585,7 @@ msgstr ""
 
 #. translators: 1. number fo commissions updated.
 #: includes/admin/admin-panels/class-yith-wcaf-commissions-admin-panel.php:80
+#, php-format
 msgctxt "[ADMIN] Commissions action messages"
 msgid "%s commissions moved to trash successfully."
 msgstr ""
@@ -593,7 +604,7 @@ msgstr "Kifizetés %s komplett"
 
 #. translators: 1. number fo commissions updated.
 #: includes/admin/admin-panels/class-yith-wcaf-commissions-admin-panel.php:88
-#, fuzzy
+#, fuzzy, php-format
 msgctxt "[ADMIN] Commissions action messages"
 msgid "%s commissions restored successfully."
 msgstr "Kifizetés %s komplett"
@@ -612,7 +623,7 @@ msgstr "Kifizetés %s komplett"
 
 #. translators: 1. number fo commissions updated.
 #: includes/admin/admin-panels/class-yith-wcaf-commissions-admin-panel.php:96
-#, fuzzy
+#, fuzzy, php-format
 msgctxt "[ADMIN] Commissions action messages"
 msgid "%s commissions deleted successfully."
 msgstr "Kifizetés %s komplett"
@@ -625,21 +636,21 @@ msgstr "Hiba a kifizetés feldolgozása közben %s: %s"
 
 #. translators: 1. Specific error messages.
 #: includes/admin/admin-panels/class-yith-wcaf-commissions-admin-panel.php:102
-#, fuzzy
+#, fuzzy, php-format
 msgctxt "[ADMIN] Commissions action messages"
 msgid "An error occurred while processing the payment: %s."
 msgstr "Hiba történt a fizetés feldolgozása során:% s"
 
 #. translators: 1. List of commission ids.
 #: includes/admin/admin-panels/class-yith-wcaf-commissions-admin-panel.php:107
-#, fuzzy
+#, fuzzy, php-format
 msgctxt "[ADMIN] Commissions action messages"
 msgid "Commission(s) %s paid successfully."
 msgstr "Kifizetés %s komplett"
 
 #. translators: 1. List of commission ids.
 #: includes/admin/admin-panels/class-yith-wcaf-commissions-admin-panel.php:112
-#, fuzzy
+#, fuzzy, php-format
 msgctxt "[ADMIN] Commissions action messages"
 msgid "Commission(s) %s could not be paid."
 msgstr "Jutalék %s nem kifizethető"
@@ -649,18 +660,21 @@ msgstr "Jutalék %s nem kifizethető"
 #: includes/admin/admin-panels/class-yith-wcaf-commissions-admin-panel.php:308
 #: includes/admin/admin-panels/class-yith-wcaf-payments-admin-panel.php:188
 #: includes/admin/admin-panels/class-yith-wcaf-payments-admin-panel.php:293
+#, php-format
 msgctxt "[ADMIN] Status change note"
 msgid "Status changed from %1$s to %2$s by %3$s."
 msgstr ""
 
 #. translators: 1. Current user login.
 #: includes/admin/admin-panels/class-yith-wcaf-commissions-admin-panel.php:319
+#, php-format
 msgctxt "[ADMIN] Status change note"
 msgid "Moved to the trash by %s."
 msgstr ""
 
 #. translators: 1. Current user login. 2. New commission status.
 #: includes/admin/admin-panels/class-yith-wcaf-commissions-admin-panel.php:338
+#, php-format
 msgctxt "[ADMIN] Status change note"
 msgid "%1$s restored this item; the system automatically assigned %2$s status."
 msgstr ""
@@ -715,7 +729,7 @@ msgstr "Kifizetés %s komplett"
 
 #. translators: 1. number fo commissions updated.
 #: includes/admin/admin-panels/class-yith-wcaf-payments-admin-panel.php:67
-#, fuzzy
+#, fuzzy, php-format
 msgctxt "[ADMIN] Payments action messages"
 msgid "%s payment records updated successfully."
 msgstr "Kifizetés %s komplett"
@@ -734,7 +748,7 @@ msgstr "Kifizetés %s komplett"
 
 #. translators: 1. number fo commissions updated.
 #: includes/admin/admin-panels/class-yith-wcaf-payments-admin-panel.php:75
-#, fuzzy
+#, fuzzy, php-format
 msgctxt "[ADMIN] Payments action messages"
 msgid "%s payment records deleted successfully."
 msgstr "Kifizetés %s komplett"
@@ -747,21 +761,21 @@ msgstr "Hiba a kifizetés feldolgozása közben %s: %s"
 
 #. translators: 1. Specific error messages.
 #: includes/admin/admin-panels/class-yith-wcaf-payments-admin-panel.php:81
-#, fuzzy
+#, fuzzy, php-format
 msgctxt "[ADMIN] Payments action messages"
 msgid "An error occurred while processing the payment: %s."
 msgstr "Hiba történt a fizetés feldolgozása során:% s"
 
 #. translators: 1. List of commission ids.
 #: includes/admin/admin-panels/class-yith-wcaf-payments-admin-panel.php:86
-#, fuzzy
+#, fuzzy, php-format
 msgctxt "[ADMIN] Payments action messages"
 msgid "Payment %s issued successfully."
 msgstr "Kifizetés %s komplett"
 
 #. translators: 1. List of commission ids.
 #: includes/admin/admin-panels/class-yith-wcaf-payments-admin-panel.php:91
-#, fuzzy
+#, fuzzy, php-format
 msgctxt "[ADMIN] Payments action messages"
 msgid "Payment %s could not be completed."
 msgstr "Jutalék %s nem kifizethető"
@@ -1096,7 +1110,7 @@ msgstr "Megjegyzés törlése"
 
 #. translators: 1. Payment gateway label.
 #: includes/admin/admin-tables/class-yith-wcaf-commissions-admin-table.php:316
-#, fuzzy
+#, fuzzy, php-format
 msgctxt "[ADMIN] Commissions bulk actions"
 msgid "Pay via %s"
 msgstr "Fizetési mód: %s"
@@ -1215,7 +1229,7 @@ msgstr "Törlés"
 
 #. translators: 1. Payment gateway label.
 #: includes/admin/admin-tables/class-yith-wcaf-payments-admin-table.php:252
-#, fuzzy
+#, fuzzy, php-format
 msgctxt "[ADMIN] Payments bulk actions"
 msgid "Pay via %s"
 msgstr "Fizetési mód: %s"
@@ -1338,7 +1352,7 @@ msgstr "(E-mail cím, ahol meg szeretné kapni a PayPal fizetési jutalékok)"
 
 #. translators: 1. Gateway name.
 #: includes/admin/class-yith-wcaf-admin-profile.php:178
-#, fuzzy
+#, fuzzy, php-format
 msgctxt "[ADMIN] Affiliate profile form"
 msgid "Affiliate %s information"
 msgstr "Számlázási információk"
@@ -1538,6 +1552,7 @@ msgstr ""
 
 #. translators: 1. Minimum balance for withdraw.
 #: includes/class-yith-wcaf-affiliate.php:1239
+#, php-format
 msgctxt "[FRONTEND] Message above payment tab"
 msgid ""
 "<b>Note:</b> you'll be able to request a payment as soon as you collect a "
@@ -1733,7 +1748,7 @@ msgstr[1] "Konvertált"
 
 #. translators: 1. Status name.
 #: includes/class-yith-wcaf-commission.php:695
-#, fuzzy
+#, fuzzy, php-format
 msgctxt "[ADMIN] Single commission actions"
 msgid "Change status to %s"
 msgstr "Visszatérítettre állítás"
@@ -1746,7 +1761,7 @@ msgstr "Kifizetettnek jelöl"
 
 #. translators: 1. Payment gateway label.
 #: includes/class-yith-wcaf-commission.php:726
-#, fuzzy
+#, fuzzy, php-format
 msgctxt "[ADMIN] Single commission actions"
 msgid "Pay via %s"
 msgstr "Fizetési mód: %s"
@@ -1856,6 +1871,7 @@ msgstr "Beállítások"
 
 #. translators: 1. Error message.
 #: includes/class-yith-wcaf-form-handler.php:192
+#, php-format
 msgctxt "[FRONTEND] General form error message"
 msgid "<b>Error:</b> %s"
 msgstr ""
@@ -1963,11 +1979,13 @@ msgstr ""
 
 #. translators: 1. Refunded amount. 2. Refund id.
 #: includes/class-yith-wcaf-orders.php:645
+#, php-format
 msgid "Refunded %1$s due to refund #%2$s creation"
 msgstr ""
 
 #. translators: 1. Restored amount. 2. Refund id.
 #: includes/class-yith-wcaf-orders.php:695
+#, php-format
 msgid "Restored %1$s due to refund #%2$s deletion"
 msgstr ""
 
@@ -1985,14 +2003,14 @@ msgstr "N/A"
 
 #. translators: 1. Status name.
 #: includes/class-yith-wcaf-payment.php:517
-#, fuzzy
+#, fuzzy, php-format
 msgctxt "[ADMIN] Single payment actions"
 msgid "Change status to %s"
 msgstr "Visszatérítettre állítás"
 
 #. translators: 1. Payment gateway label.
 #: includes/class-yith-wcaf-payment.php:537
-#, fuzzy
+#, fuzzy, php-format
 msgctxt "[ADMIN] Single payment actions"
 msgid "Pay via %s"
 msgstr "Fizetési mód: %s"
@@ -2000,6 +2018,7 @@ msgstr "Fizetési mód: %s"
 #. translators: 1. Old status. 2. New status. 3. Payment id.
 #: includes/class-yith-wcaf-payment.php:1133
 #: includes/class-yith-wcaf-payment.php:1158
+#, php-format
 msgctxt ""
 "[ADMIN] Note added to commission when status changes because of related "
 "payment operation"
@@ -2335,35 +2354,35 @@ msgstr "Partner"
 
 #. translators: 1. Affiliate ID.
 #: includes/class-yith-wcaf-privacy.php:519
-#, fuzzy
+#, fuzzy, php-format
 msgctxt "[PRIVACY] Eraser message"
 msgid "Anonymized affiliate %s."
 msgstr "Partneri jelentkezés automatikus engedélyezése"
 
 #. Translators: 1. Payment id.
 #: includes/class-yith-wcaf-privacy.php:585
-#, fuzzy
+#, fuzzy, php-format
 msgctxt "[PRIVACY] Eraser message"
 msgid "Anonymized payment %s."
 msgstr "Nincsenek aktív kifizetések"
 
 #. Translators: 1. Payment id.
 #: includes/class-yith-wcaf-privacy.php:589
-#, fuzzy
+#, fuzzy, php-format
 msgctxt "[PRIVACY] Eraser message"
 msgid "Payment %s has been retained."
 msgstr "Kifizetés %s részletei"
 
 #. Translators: 1. Click ID.
 #: includes/class-yith-wcaf-privacy.php:662
-#, fuzzy
+#, fuzzy, php-format
 msgctxt "[PRIVACY] Eraser message"
 msgid "Anonymized hit %s."
 msgstr "Partneri jelentkezés automatikus engedélyezése"
 
 #. Translators: 1. Click ID.
 #: includes/class-yith-wcaf-privacy.php:666
-#, fuzzy
+#, fuzzy, php-format
 msgctxt "[PRIVACY] Eraser message"
 msgid "Visit %s has been retained."
 msgstr "Jutalékok %s részletei"
@@ -2573,14 +2592,14 @@ msgstr ""
 
 #. translators: 1. Label of the required field missing.
 #: includes/functions-yith-wcaf.php:666 includes/functions-yith-wcaf.php:673
-#, fuzzy
+#, fuzzy, php-format
 msgctxt "[GLOBAL] Error message thrown when settings validation fails"
 msgid "Please, choose a valid option for %s"
 msgstr "Kérlek, írj be egy érvényes vezetéknevet."
 
 #. translators: 1. Label of the required field missing.
 #: includes/functions-yith-wcaf.php:680
-#, fuzzy
+#, fuzzy, php-format
 msgctxt "[GLOBAL] Error message thrown when settings validation fails"
 msgid "Please, provide a valid email address for %s"
 msgstr ""
@@ -2589,33 +2608,35 @@ msgstr ""
 
 #. translators: 1. Label of the required field missing.
 #: includes/functions-yith-wcaf.php:687
-#, fuzzy
+#, fuzzy, php-format
 msgctxt "[GLOBAL] Error message thrown when settings validation fails"
 msgid "Please, provide a valid value for %s"
 msgstr "Kérlek, írj be egy érvényes vezetéknevet."
 
 #. translators: 1. Label of the required field missing.
 #: includes/functions-yith-wcaf.php:706
-#, fuzzy
+#, fuzzy, php-format
 msgctxt "[GLOBAL] Error message thrown when settings validation fails"
 msgid "Please, make sure to enter a valid email address for %s"
 msgstr "Kérlek, írj be egy érvényes keresztnevet."
 
 #. translators: 1. Label of the required field missing.
 #: includes/functions-yith-wcaf.php:712
-#, fuzzy
+#, fuzzy, php-format
 msgctxt "[GLOBAL] Error message thrown when settings validation fails"
 msgid "Please, make sure to enter a valid phone number for %s"
 msgstr "Kérlek, írj be egy érvényes keresztnevet."
 
 #. translators: 1. Label of the required field missing.
 #: includes/functions-yith-wcaf.php:720
+#, php-format
 msgctxt "[GLOBAL] Error message thrown when settings validation fails"
 msgid "Please, make sure to enter a valid URL address for %s"
 msgstr ""
 
 #. translators: 1. Label of the required field missing.
 #: includes/functions-yith-wcaf.php:734
+#, php-format
 msgctxt "[GLOBAL] Error message thrown when settings validation fails"
 msgid "%s is a required field"
 msgstr ""
@@ -2657,12 +2678,14 @@ msgstr ""
 
 #. translators: 1. Payment ID.
 #: includes/gateways/class-yith-wcaf-bacs-gateway.php:111
+#, php-format
 msgctxt "[ADMIN] Gateway logs."
 msgid "Trying to pay %s with BACS"
 msgstr ""
 
 #. translators: 1. Payment ID.
 #: includes/gateways/class-yith-wcaf-bacs-gateway.php:118
+#, php-format
 msgctxt "[ADMIN] Gateway logs."
 msgid "Unable to find payment object (#%s)"
 msgstr ""
@@ -2677,19 +2700,21 @@ msgstr "Kifizetési email"
 
 #. translators: 1. Payment ID.
 #: includes/gateways/class-yith-wcaf-bacs-gateway.php:130
-#, fuzzy
+#, fuzzy, php-format
 msgctxt "[ADMIN] Gateway logs."
 msgid "Unable to find affiliate for payment (#%s)"
 msgstr "Partneri oldalak"
 
 #. translators: 1. Affiliate ID.
 #: includes/gateways/class-yith-wcaf-bacs-gateway.php:143
+#, php-format
 msgctxt "[ADMIN] Gateway logs."
 msgid "Cannot pay affiliate #%s with this gateway"
 msgstr ""
 
 #. translators: 1. Payment ID. 2. Account name. 2. IBAN. 3. Swift code.
 #: includes/gateways/class-yith-wcaf-bacs-gateway.php:165
+#, php-format
 msgctxt "[ADMIN] Gateway logs."
 msgid ""
 "Missing required information for payment #%1$s (Name -> %2$s, IBAN -> %3$s, "
@@ -2708,7 +2733,7 @@ msgstr ""
 
 #. translators: 1. Payment ID.
 #: includes/gateways/class-yith-wcaf-bacs-gateway.php:197
-#, fuzzy
+#, fuzzy, php-format
 msgctxt "[ADMIN] Gateway logs."
 msgid "Payment %s processed successfully with BACS"
 msgstr "Kifizetés %s komplett"
@@ -2721,12 +2746,14 @@ msgstr "Kifizetés elküldve"
 
 #. translators: 1. Gateway id.
 #: includes/gateways/class-yith-wcaf-legacy-gateway-wrapper.php:45
+#, php-format
 msgctxt "[ADMIN] Generic legacy gateway name"
 msgid "Legacy gateway (%s)"
 msgstr ""
 
 #. translators: 1. Current user login. 2. New commission status.
 #: includes/legacy/class-yith-wcaf-commissions-legacy.php:158
+#, php-format
 msgid ""
 "Item restored from trash; the system automatically assigned %2$s status."
 msgstr ""
@@ -2772,7 +2799,7 @@ msgstr "Mutassa a név mezőt"
 
 #. translators: 1. Affiliate formatted name.
 #: includes/shortcodes/class-yith-wcaf-affiliate-dashboard-shortcode.php:225
-#, fuzzy
+#, fuzzy, php-format
 msgctxt "[FRONTEND] No longer in use"
 msgid "Hello <strong>%1$s</strong> (not %1$s? <a href=\"%2$s\">Sign out</a>)."
 msgstr ""
@@ -2781,7 +2808,7 @@ msgstr ""
 
 #. translators: 1. Link to affiliate settings page.
 #: includes/shortcodes/class-yith-wcaf-affiliate-dashboard-shortcode.php:242
-#, fuzzy
+#, fuzzy, php-format
 msgctxt "[FRONTEND] No longer in use"
 msgid ""
 "From your affiliate dashboard you can view your recent commissions and "
@@ -2933,7 +2960,7 @@ msgstr "Partneri regisztrációs és adminisztrációs oldal"
 
 #. translators: 1. Plugin name.
 #: init.php:87
-#, fuzzy
+#, fuzzy, php-format
 msgid ""
 "%s is enabled but not effective. It requires WooCommerce in order to work."
 msgstr ""
@@ -2942,6 +2969,7 @@ msgstr ""
 
 #. translators: 1. Plugin name.
 #: init.php:107
+#, php-format
 msgid ""
 "You can't activate the free version of %s while you are using the premium "
 "one."
@@ -3152,7 +3180,7 @@ msgstr ""
 
 #. translators: 1. Blog name.
 #: plugin-options/settings/affiliates-dashboard-options.php:118
-#, fuzzy
+#, fuzzy, php-format
 msgctxt "[ADMIN] Affiliate dashboard settings page"
 msgid "My Referral URL on %s"
 msgstr "Hivatkozó URL"
@@ -3685,7 +3713,7 @@ msgstr "Hivatkozó URL"
 
 #. translators: 1. Blog name. 2. Share link url.
 #: templates/shortcodes/link-generator/share.php:32
-#, fuzzy
+#, fuzzy, php-format
 msgctxt "[FRONTEND] Share message"
 msgid "My Referral URL on %1$s - %2$s"
 msgstr "Hivatkozó URL"
@@ -3905,12 +3933,14 @@ msgstr "Új partner hozzáadása"
 
 #. translators: 1. Affiliate complete name.
 #: views/affiliates/ban-modal.php:24
+#, php-format
 msgctxt "[ADMIN] Ban affiliate modal"
 msgid "You're about to ban <strong>%s</strong> from your affiliate program."
 msgstr ""
 
 #. translators: 1. Number of affiliates that you're going to ban.
 #: views/affiliates/ban-modal.php:34
+#, php-format
 msgctxt "[ADMIN] Ban affiliate modal"
 msgid ""
 "You're about to ban <strong>%s affiliates</strong> from your affiliate "
@@ -3947,6 +3977,7 @@ msgstr "Partner"
 
 #. translators: 1. Affiliate complete name.
 #: views/affiliates/reject-modal.php:30
+#, php-format
 msgctxt "[ADMIN] Reject affiliate modal"
 msgid ""
 "You're about to reject <strong>%s</strong> application for your affiliate "
@@ -3955,6 +3986,7 @@ msgstr ""
 
 #. translators: 1. Number of affiliates that you're going to ban.
 #: views/affiliates/reject-modal.php:40
+#, php-format
 msgctxt "[ADMIN] Reject affiliate modal"
 msgid ""
 "You're about to reject <strong>%s affiliates</strong> application for your "
