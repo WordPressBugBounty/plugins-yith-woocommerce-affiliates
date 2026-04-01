@@ -5,7 +5,7 @@ msgstr ""
 "Project-Id-Version: YITH WooCommerce Affiliates\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/yith-woocommerce-"
 "affiliates\n"
-"POT-Creation-Date: 2025-08-07T12:37:28+00:00\n"
+"POT-Creation-Date: 2026-04-01T10:59:17+00:00\n"
 "PO-Revision-Date: 2022-04-05 15:37+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -2261,66 +2261,66 @@ msgctxt "[PRIVACY] Eraser message"
 msgid "Visit %s has been retained."
 msgstr "La visita %s è stata mantenuta."
 
-#: includes/class-yith-wcaf.php:180
+#: includes/class-yith-wcaf.php:171
 msgctxt "[GLOBAL] After copy message"
 msgid "URL copied"
 msgstr "URL copiato"
 
-#: includes/class-yith-wcaf.php:181
+#: includes/class-yith-wcaf.php:172
 msgctxt "[FRONTEND] Toggle fields text"
 msgid "ON"
 msgstr "Sì"
 
-#: includes/class-yith-wcaf.php:182
+#: includes/class-yith-wcaf.php:173
 msgctxt "[FRONTEND] Toggle fields text"
 msgid "OFF"
 msgstr "No"
 
-#: includes/class-yith-wcaf.php:183
+#: includes/class-yith-wcaf.php:174
 msgctxt "[FRONTEND] Withdraw modal"
 msgid "Request withdrawal"
 msgstr "Richiesta di pagamento"
 
-#: includes/class-yith-wcaf.php:185
+#: includes/class-yith-wcaf.php:176
 msgctxt "[GLOBAL] Form validation error"
 msgid "Please, accept this condition"
 msgstr "Ti preghiamo di accettare i nostri Termini"
 
-#: includes/class-yith-wcaf.php:186
+#: includes/class-yith-wcaf.php:177
 msgctxt "[GLOBAL] Form validation error"
 msgid "Please, complete this field"
 msgstr "Completa questo campo"
 
-#: includes/class-yith-wcaf.php:187
+#: includes/class-yith-wcaf.php:178
 #, fuzzy
 msgctxt "[GLOBAL] Form validation error"
 msgid "Please, enter a valid URL"
 msgstr "Inserisci un importo valido per la richiesta di pagamento."
 
-#: includes/class-yith-wcaf.php:188
+#: includes/class-yith-wcaf.php:179
 #, fuzzy
 msgctxt "[GLOBAL] Form validation error"
 msgid "Please, enter a valid email address"
 msgstr "Inserisci un valido indirizzo email per %s"
 
-#: includes/class-yith-wcaf.php:189
+#: includes/class-yith-wcaf.php:180
 #, fuzzy
 msgctxt "[GLOBAL] Form validation error"
 msgid "Please, enter a valid value"
 msgstr "Assicurati di inserire un valore valido per %s"
 
-#: includes/class-yith-wcaf.php:190
+#: includes/class-yith-wcaf.php:181
 #, fuzzy
 msgctxt "[GLOBAL] Form validation error"
 msgid "Please, enter a valid amount"
 msgstr "Inserisci un importo valido per la richiesta di pagamento."
 
-#: includes/class-yith-wcaf.php:191
+#: includes/class-yith-wcaf.php:182
 msgctxt "[GLOBAL] Form validation error"
 msgid "Value is too short"
 msgstr ""
 
-#: includes/class-yith-wcaf.php:192
+#: includes/class-yith-wcaf.php:183
 msgctxt "[GLOBAL] Form validation error"
 msgid "Value is too long"
 msgstr ""

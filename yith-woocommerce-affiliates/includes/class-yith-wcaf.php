@@ -25,7 +25,7 @@ if ( ! class_exists( 'YITH_WCAF' ) ) {
 		 * @const string
 		 * @since 2.0.0
 		 */
-		const VERSION = '3.25.0';
+		const VERSION = '3.26.0';
 
 		/**
 		 * Plugin version
@@ -71,19 +71,20 @@ if ( ! class_exists( 'YITH_WCAF' ) ) {
 			add_action( 'plugins_loaded', array( $this, 'privacy_loader' ), 20 );
 
 			// enqueue frontend scripts.
-			add_action( 'init', array( $this, 'register_scripts' ) );
 			add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
 
 			add_action( 'before_woocommerce_init', array( $this, 'declare_wc_features_support' ) );
 		}
 
 		/**
-		 * Register frontend scripts
+		 * Enqueue frontend scripts
 		 *
 		 * @return void
-		 * @since 2.0.0
+		 * @since 1.0.0
 		 */
-		public function register_scripts() {
+		public function enqueue_scripts() {
+			global $wp, $post;
+
 			$suffix = ( defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ) ? '' : '.min';
 
 			// register fontello fonts (social share icons).
@@ -111,16 +112,6 @@ if ( ! class_exists( 'YITH_WCAF' ) ) {
 			 * Allows to trigger some action when the plugin scripts are registered.
 			 */
 			do_action( 'yith_wcaf_scripts_registered' );
-		}
-
-		/**
-		 * Enqueue frontend scripts
-		 *
-		 * @return void
-		 * @since 1.0.0
-		 */
-		public function enqueue_scripts() {
-			global $wp, $post;
 
 			/**
 			 * DO_ACTION: yith_wcaf_before_style_enqueue
